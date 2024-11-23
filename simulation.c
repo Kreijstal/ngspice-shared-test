@@ -148,15 +148,14 @@ int main() {
     fflush(stdout); // Ensure output is visible
 
     // Run the simulation in background
-    context.is_running = true; // Set running flag before starting
     ret = ngSpice_Command("bg_run");
     if (ret != 0) {
         fprintf(stderr, "Error starting simulation\n");
         return 1;
     }
 
-    // Wait for simulation to complete or background thread to stop
-    while (!context.simulation_finished && context.is_running) {
+    // Wait for simulation to complete
+    while (!context.simulation_finished) {
         // Polling delay to reduce CPU usage
         #ifdef _WIN32
             Sleep(100); // Windows uses milliseconds
