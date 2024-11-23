@@ -12,6 +12,8 @@ typedef struct {
     int current_progress;
     FILE* csv_file;
     bool voltage_altered;
+    bool should_alter_voltage;
+    bool is_bg_running;
 } SimContext;
 
 // Global context pointer for signal handler
@@ -99,13 +101,10 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         // Print and write time point
         printf("\nTime = %g\n", timeValue->creal);
         
-        // Check if we need to alter voltage at t>=6s
-        if (!context->voltage_altered && timeValue->creal >= 6.0) {
-            ngSpice_Command("bg_halt");
-            ngSpice_Command("alter Vvdc=0");
-            context->voltage_altered = true;
-            printf("Voltage source altered to 0V at t=%g\n", timeValue->creal);
-            ngSpice_Command("bg_resume");
+        // Set flag when we reach t>=6s
+        if (!context->voltage_altered && !context->should_alter_voltage && timeValue->creal >= 6.0) {
+            context->should_alter_voltage = true;
+            printf("Time threshold reached at t=%g, preparing to alter voltage\n", timeValue->creal);
         }
         
         // Write data to CSV
@@ -185,6 +184,7 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
 // Callback function for background thread status
 int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
+    context->is_bg_running = running;
     printf("Background thread status: %s\n", running ? "running" : "stopped");
     return 0;
 }
@@ -200,6 +200,8 @@ int main() {
     context.simulation_finished = false;
     context.current_progress = 0;
     context.voltage_altered = false;
+    context.should_alter_voltage = false;
+    context.is_bg_running = false;
     
     // Open CSV file for writing
     context.csv_file = fopen("simulation_data.csv", "w");
@@ -225,7 +227,7 @@ int main() {
         "Rres1 k y 1.0Ohm",
         ".options TEMP = 25C",
         ".options TNOM = 25C",
-        ".tran 0.001s 10s 0s uic",
+        ".tran 0.001s 30s 0s uic",
         ".end",
         NULL
     };
@@ -250,6 +252,24 @@ int main() {
     // Wait for simulation to complete
     while (!context.simulation_finished) {
         printf("current_progress %d%%\n",context.current_progress);
+        
+        // Check if we need to alter voltage
+        if (context.should_alter_voltage && !context.voltage_altered && context.is_bg_running) {
+            printf("Halting simulation to alter voltage...\n");
+            ngSpice_Command("bg_halt");
+            
+            // Wait for simulation to actually halt
+            while (context.is_bg_running) {
+                usleep(10000);
+            }
+            
+            printf("Simulation halted, altering voltage...\n");
+            ngSpice_Command("alter Vvdc=0");
+            context.voltage_altered = true;
+            
+            printf("Resuming simulation...\n");
+            ngSpice_Command("bg_resume");
+        }
         
         // Polling delay to reduce CPU usage
         #ifdef _WIN32
