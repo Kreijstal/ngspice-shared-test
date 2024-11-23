@@ -14,6 +14,7 @@ typedef struct {
     bool voltage_altered;
     bool should_alter_voltage;
     bool is_bg_running;
+    bool headers_written;
 } SimContext;
 
 // Global context pointer for signal handler
@@ -166,17 +167,20 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
     }
     printf("\n");
     
-    // Write CSV headers
-    fprintf(context->csv_file, "Time");
-    for (int i = 0; i < initdata->veccount; i++) {
-        pvecinfo vec = initdata->vecs[i];
-        if (!vec || !vec->vecname) continue;
-        // Skip the time vector since we already have it as the first column
-        if (strcmp(vec->vecname, "time") != 0) {
-            fprintf(context->csv_file, ",%s", vec->vecname);
+    // Write CSV headers only once
+    if (!context->headers_written) {
+        fprintf(context->csv_file, "Time");
+        for (int i = 0; i < initdata->veccount; i++) {
+            pvecinfo vec = initdata->vecs[i];
+            if (!vec || !vec->vecname) continue;
+            // Skip the time vector since we already have it as the first column
+            if (strcmp(vec->vecname, "time") != 0) {
+                fprintf(context->csv_file, ",%s", vec->vecname);
+            }
         }
+        fprintf(context->csv_file, "\n");
+        context->headers_written = true;
     }
-    fprintf(context->csv_file, "\n");
     
     return 0;
 }
@@ -203,6 +207,7 @@ int main() {
     context.voltage_altered = false;
     context.should_alter_voltage = false;
     context.is_bg_running = false;
+    context.headers_written = false;
     
     // Open CSV file for writing
     context.csv_file = fopen("simulation_data.csv", "w");
