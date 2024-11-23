@@ -53,11 +53,23 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         return 0;
     }
 
-    // Print and write time point
-    printf("\nTime = %g\n", vecdata->vecsa[0]->creal);
+    // Find the time vector
+    pvecvalues timeValue = NULL;
+    for (int i = 0; i < vecdata->veccount; i++) {
+        if (vecdata->vecsa[i] && vecdata->vecsa[i]->name && 
+            strcmp(vecdata->vecsa[i]->name, "time") == 0) {
+            timeValue = vecdata->vecsa[i];
+            break;
+        }
+    }
     
-    // Write data to CSV
-    fprintf(context->csv_file, "%g", vecdata->vecsa[0]->creal);
+    if (timeValue) {
+        // Print and write time point
+        printf("\nTime = %g\n", timeValue->creal);
+        
+        // Write data to CSV
+        fprintf(context->csv_file, "%g", timeValue->creal);
+    }
     
     // Print and write values for each vector
     for (int i = 0; i < vecdata->veccount; i++) {
