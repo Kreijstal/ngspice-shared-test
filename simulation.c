@@ -17,8 +17,8 @@ int ng_getchar(char* outputchar, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
     printf("%s\n", outputchar);
     // Close CSV file
-    if (context.csv_file) {
-        fclose(context.csv_file);
+    if (context->csv_file) {
+        fclose(context->csv_file);
     }
 
     return 0;
