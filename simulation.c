@@ -183,9 +183,10 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
 
 // Callback function for background thread status
 int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
+  printf("IS THIS BEING EXECUTED~!!!?");
     SimContext* context = (SimContext*)userdata;
-    context->is_bg_running = running;
-    printf("Background thread status: %s\n", running ? "running" : "stopped");
+    context->is_bg_running = !running;
+    printf("Background thread status: %s\n", !running ? "running" : "stopped");
     return 0;
 }
 
@@ -227,7 +228,7 @@ int main() {
         "Rres1 k y 1.0Ohm",
         ".options TEMP = 25C",
         ".options TNOM = 25C",
-        ".tran 0.001s 30s 0s uic",
+        ".tran 0.001s 12s 0s uic",
         ".end",
         NULL
     };
@@ -251,7 +252,7 @@ int main() {
 
     // Wait for simulation to complete
     while (!context.simulation_finished) {
-        printf("current_progress %d%%\n",context.current_progress);
+        printf("current_progress %d%%  should_alter_voltage: %d %d\n",context.current_progress,context.should_alter_voltage,context.is_bg_running );
         
         // Check if we need to alter voltage
         if (context.should_alter_voltage && !context.voltage_altered && context.is_bg_running) {
