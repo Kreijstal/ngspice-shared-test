@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 // Structure to hold simulation context
 typedef struct {
@@ -11,6 +12,19 @@ typedef struct {
     int current_progress;
     FILE* csv_file;
 } SimContext;
+
+// Global context pointer for signal handler
+static SimContext* g_context = NULL;
+
+// Signal handler for graceful shutdown
+void signal_handler(int signum) {
+    if (g_context && g_context->csv_file) {
+        fflush(g_context->csv_file);
+        fclose(g_context->csv_file);
+        g_context->csv_file = NULL;
+    }
+    exit(signum);
+}
 
 // Callback function to handle character output from ngspice
 int ng_getchar(char* outputchar, int ident, void* userdata) {
@@ -94,6 +108,7 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         }
     }
     fprintf(context->csv_file, "\n");
+    fflush(context->csv_file);  // Flush after each data point
     
     return 0;
 }
@@ -150,6 +165,11 @@ int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
 int main() {
     // Declare the simulation context
     SimContext context;
+    g_context = &context;  // Set global pointer for signal handler
+    
+    // Set up signal handlers
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
     context.simulation_finished = false;
     context.current_progress = 0;
     
