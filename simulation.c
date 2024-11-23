@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <ctype.h>
 // Structure to hold simulation context
 typedef struct {
     bool simulation_finished;
@@ -33,14 +33,31 @@ int ng_getchar(char* outputchar, int ident, void* userdata) {
     return 0;
 }
 
-// Callback function to handle simulation status
 int ng_getstat(char* outputstat, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
-    // Parse percentage from status message if available
-    int percent;
-    if (sscanf(outputstat, "%*[^=]=%d", &percent) == 1) {
-        context->current_progress = percent;
+    
+    // Check for completion
+    if (strcmp(outputstat, "--ready--") == 0) {
+        context->simulation_finished = true;
+        context->current_progress = 100;
+        return 0;
     }
+
+    // Parse percentage - look for any XX.X% pattern in the string
+    float percent;
+    char* percent_pos = strstr(outputstat, "%");
+    if (percent_pos) {
+        // Scan backwards from % to find the number
+        char* num_start = percent_pos;
+        while (num_start > outputstat && 
+              (isdigit(*(num_start-1)) || *(num_start-1) == '.')) {
+            num_start--;
+        }
+        if (sscanf(num_start, "%f%%", &percent) == 1) {
+            context->current_progress = (int)percent;
+        }
+    }
+
     printf("Status: %s (Progress: %d%%)\n", outputstat, context->current_progress);
     return 0;
 }
@@ -221,6 +238,7 @@ int main() {
 
     // Wait for simulation to complete
     while (!context.simulation_finished) {
+    printf("current_progress %d%%\n",context.current_progress);
         // Polling delay to reduce CPU usage
         #ifdef _WIN32
             Sleep(100); // Windows uses milliseconds
