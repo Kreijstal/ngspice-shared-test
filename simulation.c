@@ -11,6 +11,7 @@ typedef struct {
     bool simulation_finished;
     int current_progress;
     FILE* csv_file;
+    bool voltage_altered;
 } SimContext;
 
 // Global context pointer for signal handler
@@ -97,6 +98,13 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     if (timeValue) {
         // Print and write time point
         printf("\nTime = %g\n", timeValue->creal);
+        
+        // Check if we need to alter voltage at t>=6s
+        if (!context->voltage_altered && timeValue->creal >= 6.0) {
+            ngSpice_Command("alter Vvdc=0");
+            context->voltage_altered = true;
+            printf("Voltage source altered to 0V at t=%g\n", timeValue->creal);
+        }
         
         // Write data to CSV
         fprintf(context->csv_file, "%g", timeValue->creal);
@@ -189,6 +197,7 @@ int main() {
     signal(SIGTERM, signal_handler);
     context.simulation_finished = false;
     context.current_progress = 0;
+    context.voltage_altered = false;
     
     // Open CSV file for writing
     context.csv_file = fopen("simulation_data.csv", "w");
@@ -237,16 +246,8 @@ int main() {
     }
 
     // Wait for simulation to complete
-    bool voltage_altered = false;
     while (!context.simulation_finished) {
         printf("current_progress %d%%\n",context.current_progress);
-        
-        // Check if we need to alter voltage at t>=6s
-        if (!voltage_altered && context.current_progress >= 99) {
-            ngSpice_Command("alter Vvdc=0");
-            voltage_altered = true;
-            printf("Voltage source altered to 0V\n");
-        }
         
         // Polling delay to reduce CPU usage
         #ifdef _WIN32
