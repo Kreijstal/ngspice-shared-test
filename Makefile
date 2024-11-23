@@ -1,5 +1,7 @@
 CC ?= gcc
+CFLAGS ?=
+LDFLAGS ?=
 LDLIBS = -lngspice
 
 simulation: simulation.c
-	$(CC) $< -o $@ $(LDLIBS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS)
