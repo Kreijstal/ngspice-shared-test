@@ -101,9 +101,11 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         
         // Check if we need to alter voltage at t>=6s
         if (!context->voltage_altered && timeValue->creal >= 6.0) {
+            ngSpice_Command("bg_halt");
             ngSpice_Command("alter Vvdc=0");
             context->voltage_altered = true;
             printf("Voltage source altered to 0V at t=%g\n", timeValue->creal);
+            ngSpice_Command("bg_resume");
         }
         
         // Write data to CSV
