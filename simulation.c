@@ -140,7 +140,7 @@ int main() {
     // Load the circuit
     ret = ngSpice_Circ((char**)circuit);
     if (ret != 0) {
-        fprintf(stderr, "Error loading circuit: %s\n", ngSpice_Error(ret)); // More detailed error message
+        fprintf(stderr, "Error loading circuit\n");
         return 1;
     }
 
@@ -151,7 +151,7 @@ int main() {
     context.is_running = true; // Set running flag before starting
     ret = ngSpice_Command("bg_run");
     if (ret != 0) {
-        fprintf(stderr, "Error starting simulation: %s\n", ngSpice_Error(ret)); // More detailed error message
+        fprintf(stderr, "Error starting simulation\n");
         return 1;
     }
 
