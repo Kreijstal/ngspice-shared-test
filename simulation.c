@@ -110,6 +110,11 @@ int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
 }
 
 int main() {
+    // Declare the simulation context
+    SimContext context;
+    context.simulation_finished = false;
+    context.current_progress = 0;
+
     // Initialize ngspice
     int ret = ngSpice_Init(ng_getchar, ng_getstat, ng_exit,
                           ng_data, ng_initdata, ng_bgrunning, &context);
@@ -135,7 +140,7 @@ int main() {
     // Load the circuit
     ret = ngSpice_Circ((char**)circuit);
     if (ret != 0) {
-        fprintf(stderr, "Error loading circuit: %s\n", ngSpice_Err(ret)); // More detailed error message
+        fprintf(stderr, "Error loading circuit: %s\n", ngSpice_Error(ret)); // More detailed error message
         return 1;
     }
 
@@ -146,7 +151,7 @@ int main() {
     context.is_running = true; // Set running flag before starting
     ret = ngSpice_Command("bg_run");
     if (ret != 0) {
-        fprintf(stderr, "Error starting simulation: %s\n", ngSpice_Err(ret)); // More detailed error message
+        fprintf(stderr, "Error starting simulation: %s\n", ngSpice_Error(ret)); // More detailed error message
         return 1;
     }
 
