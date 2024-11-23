@@ -110,21 +110,15 @@ int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
 }
 
 int main() {
-    // Initialize simulation context
-    SimContext context = {
-        .simulation_finished = false,
-        .current_progress = 0
-    };
-    
     // Initialize ngspice
     int ret = ngSpice_Init(ng_getchar, ng_getstat, ng_exit,
                           ng_data, ng_initdata, ng_bgrunning, &context);
-    
+
     if (ret != 0) {
-        printf("Error initializing ngspice\n");
+        fprintf(stderr, "Error initializing ngspice\n");
         return 1;
     }
-    
+
     // Create the circuit
     const char* circuit[] = {
         ".title TB8",
@@ -137,42 +131,44 @@ int main() {
         ".end",
         NULL
     };
-    
+
     // Load the circuit
     ret = ngSpice_Circ((char**)circuit);
     if (ret != 0) {
-        printf("Error loading circuit\n");
+        fprintf(stderr, "Error loading circuit: %s\n", ngSpice_Err(ret)); // More detailed error message
         return 1;
     }
-    
+
     printf("Circuit loaded successfully. Starting simulation...\n");
-    
+    fflush(stdout); // Ensure output is visible
+
     // Run the simulation in background
+    context.is_running = true; // Set running flag before starting
     ret = ngSpice_Command("bg_run");
     if (ret != 0) {
-        printf("Error starting simulation\n");
+        fprintf(stderr, "Error starting simulation: %s\n", ngSpice_Err(ret)); // More detailed error message
         return 1;
     }
-    
-    // Wait for simulation to complete while processing events
-    while (!context.simulation_finished) {
-        // Check if simulation is still running
-        if (!ngSpice_running()) {
-            break;
-        }
-        
-        // Optional: add a small sleep here to prevent high CPU usage
+
+    // Wait for simulation to complete or background thread to stop
+    while (!context.simulation_finished && context.is_running) {
+        // Polling delay to reduce CPU usage
         #ifdef _WIN32
             Sleep(100); // Windows uses milliseconds
         #else
             usleep(100000); // Unix/Linux uses microseconds
         #endif
     }
-    
+
     printf("Simulation completed. Final progress: %d%%\n", context.current_progress);
-    
-    // Clean up (if needed)
-    ngSpice_Command("quit");
-    
+    fflush(stdout);
+
+    // Add a small delay to allow background thread to finish completely
+    #ifdef _WIN32
+        Sleep(100); // Windows uses milliseconds
+    #else
+        usleep(100000); // Unix/Linux uses microseconds
+    #endif
+
     return 0;
 }
