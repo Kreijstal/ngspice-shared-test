@@ -9,12 +9,18 @@
 typedef struct {
     bool simulation_finished;
     int current_progress;
+    FILE* csv_file;
 } SimContext;
 
 // Callback function to handle character output from ngspice
 int ng_getchar(char* outputchar, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
     printf("%s\n", outputchar);
+    // Close CSV file
+    if (context.csv_file) {
+        fclose(context.csv_file);
+    }
+
     return 0;
 }
 
@@ -52,10 +58,13 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         return 0;
     }
 
-    // Print time point
+    // Print and write time point
     printf("\nTime = %g\n", vecdata->vecsa[0]->creal);
     
-    // Print values for each vector
+    // Write data to CSV
+    fprintf(context->csv_file, "%g", vecdata->vecsa[0]->creal);
+    
+    // Print and write values for each vector
     for (int i = 0; i < vecdata->veccount; i++) {
         pvecvalues value = vecdata->vecsa[i];
         if (!value || !value->name) continue;
@@ -67,7 +76,15 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
             printf("%g", value->creal);
         }
         printf("%s\n", value->is_scale ? " (scale)" : "");
+        
+        // Write to CSV
+        if (value->is_complex) {
+            fprintf(context->csv_file, ",%g+j%g", value->creal, value->cimag);
+        } else {
+            fprintf(context->csv_file, ",%g", value->creal);
+        }
     }
+    fprintf(context->csv_file, "\n");
     
     return 0;
 }
@@ -99,6 +116,15 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
     }
     printf("\n");
     
+    // Write CSV headers
+    fprintf(context->csv_file, "Time");
+    for (int i = 0; i < initdata->veccount; i++) {
+        pvecinfo vec = initdata->vecs[i];
+        if (!vec || !vec->vecname) continue;
+        fprintf(context->csv_file, ",%s", vec->vecname);
+    }
+    fprintf(context->csv_file, "\n");
+    
     return 0;
 }
 
@@ -114,6 +140,13 @@ int main() {
     SimContext context;
     context.simulation_finished = false;
     context.current_progress = 0;
+    
+    // Open CSV file for writing
+    context.csv_file = fopen("simulation_data.csv", "w");
+    if (!context.csv_file) {
+        fprintf(stderr, "Error opening CSV file\n");
+        return 1;
+    }
 
     // Initialize ngspice
     int ret = ngSpice_Init(ng_getchar, ng_getstat, ng_exit,
