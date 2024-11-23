@@ -237,8 +237,17 @@ int main() {
     }
 
     // Wait for simulation to complete
+    bool voltage_altered = false;
     while (!context.simulation_finished) {
-    printf("current_progress %d%%\n",context.current_progress);
+        printf("current_progress %d%%\n",context.current_progress);
+        
+        // Check if we need to alter voltage at t>=6s
+        if (!voltage_altered && context.current_progress >= 99) {
+            ngSpice_Command("alter Vvdc=0");
+            voltage_altered = true;
+            printf("Voltage source altered to 0V\n");
+        }
+        
         // Polling delay to reduce CPU usage
         #ifdef _WIN32
             Sleep(100); // Windows uses milliseconds
