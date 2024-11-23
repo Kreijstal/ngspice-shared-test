@@ -214,7 +214,7 @@ int main() {
         "Rres1 k y 1.0Ohm",
         ".options TEMP = 25C",
         ".options TNOM = 25C",
-        ".tran 0.001s 6s 0s uic",
+        ".tran 0.001s 10s 0s uic",
         ".end",
         NULL
     };
