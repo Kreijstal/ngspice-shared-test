@@ -26,7 +26,7 @@ int ng_getstat(char* outputstat, int ident, void* userdata) {
     if (sscanf(outputstat, "%*[^=]=%d", &percent) == 1) {
         context->current_progress = percent;
     }
-    printf("Status: %s (Progress: %d%%)\n\n", outputstat, context->current_progress);
+    printf("Status: %s (Progress: %d%%)\n", outputstat, context->current_progress);
     return 0;
 }
 
@@ -53,20 +53,20 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     }
 
     // Print time point
-    printf("\nTime = %g\n\n", vecdata->vecsa[0]->creal);
+    printf("\nTime = %g\n", vecdata->vecsa[0]->creal);
     
     // Print values for each vector
     for (int i = 0; i < vecdata->veccount; i++) {
         pvecvalues value = vecdata->vecsa[i];
         if (!value || !value->name) continue;
         
-        printf("%s = \n", value->name);
+        printf("%s = ", value->name);
         if (value->is_complex) {
-            printf("%g + j%g\n", value->creal, value->cimag);
+            printf("%g + j%g", value->creal, value->cimag);
         } else {
-            printf("%g\n", value->creal);
+            printf("%g", value->creal);
         }
-        printf("%s\n\n", value->is_scale ? " (scale)" : "");
+        printf("%s\n", value->is_scale ? " (scale)" : "");
     }
     
     return 0;
@@ -82,10 +82,10 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
     }
 
     printf("\nSimulation initialization\n\n");
-    printf("Plot name: %s\n\n", initdata->name ? initdata->name : "unknown");
-    printf("Title: %s\n\n", initdata->title ? initdata->title : "untitled");
-    printf("Date: %s\n\n", initdata->date ? initdata->date : "unknown");
-    printf("Type: %s\n\n", initdata->type ? initdata->type : "unknown");
+    printf("Plot name: %s\n", initdata->name ? initdata->name : "unknown");
+    printf("Title: %s\n", initdata->title ? initdata->title : "untitled");
+    printf("Date: %s\n", initdata->date ? initdata->date : "unknown");
+    printf("Type: %s\n", initdata->type ? initdata->type : "unknown");
     
     printf("\nAvailable vectors:\n\n");
     for (int i = 0; i < initdata->veccount; i++) {
@@ -105,7 +105,7 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
 // Callback function for background thread status
 int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
-    printf("Background thread status: %s\n\n", running ? "running" : "stopped");
+    printf("Background thread status: %s\n", running ? "running" : "stopped");
     return 0;
 }
 
@@ -164,7 +164,7 @@ int main() {
         #endif
     }
 
-    printf("Simulation completed. Final progress: %d%%\n\n", context.current_progress);
+    printf("Simulation completed. Final progress: %d%%\n", context.current_progress);
     fflush(stdout);
 
     // Add a small delay to allow background thread to finish completely
