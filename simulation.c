@@ -72,11 +72,13 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         }
         printf("%s\n", value->is_scale ? " (scale)" : "");
         
-        // Write to CSV
-        if (value->is_complex) {
-            fprintf(context->csv_file, ",%g+j%g", value->creal, value->cimag);
-        } else {
-            fprintf(context->csv_file, ",%g", value->creal);
+        // Write to CSV, skip the time vector since we already have it as first column
+        if (strcmp(value->name, "time") != 0) {
+            if (value->is_complex) {
+                fprintf(context->csv_file, ",%g+j%g", value->creal, value->cimag);
+            } else {
+                fprintf(context->csv_file, ",%g", value->creal);
+            }
         }
     }
     fprintf(context->csv_file, "\n");
@@ -116,7 +118,10 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
     for (int i = 0; i < initdata->veccount; i++) {
         pvecinfo vec = initdata->vecs[i];
         if (!vec || !vec->vecname) continue;
-        fprintf(context->csv_file, ",%s", vec->vecname);
+        // Skip the time vector since we already have it as the first column
+        if (strcmp(vec->vecname, "time") != 0) {
+            fprintf(context->csv_file, ",%s", vec->vecname);
+        }
     }
     fprintf(context->csv_file, "\n");
     
