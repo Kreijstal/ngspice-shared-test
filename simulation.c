@@ -1,8 +1,8 @@
+#include <stdbool.h>
 #include <ngspice/sharedspice.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 // Structure to hold simulation context
 typedef struct {
@@ -162,9 +162,9 @@ int main() {
         
         // Optional: add a small sleep here to prevent high CPU usage
         #ifdef _WIN32
-            Sleep(100);
+            Sleep(100); // Windows uses milliseconds
         #else
-            usleep(100000);
+            usleep(100000); // Unix/Linux uses microseconds
         #endif
     }
     
