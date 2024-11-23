@@ -16,11 +16,6 @@ typedef struct {
 int ng_getchar(char* outputchar, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
     printf("%s\n", outputchar);
-    // Close CSV file
-    if (context->csv_file) {
-        fclose(context->csv_file);
-    }
-
     return 0;
 }
 
@@ -206,6 +201,12 @@ int main() {
     #else
         usleep(100000); // Unix/Linux uses microseconds
     #endif
+
+    // Close CSV file
+    if (context.csv_file) {
+        fclose(context.csv_file);
+        context.csv_file = NULL;
+    }
 
     return 0;
 }
