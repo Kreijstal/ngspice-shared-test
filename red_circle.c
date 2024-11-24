@@ -190,9 +190,8 @@ int main(int argc, char* argv[]) {
         }
         hlineRGBA(renderer, 0, 639, 479, 255, 255, 255, 255);
         vlineRGBA(renderer, 0, 0, 479, 255, 255, 255, 255);
-        for (int x = -tick_offset; x < BUFFER_SIZE; x += 50) {
-            if (x >= 0)
-                vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255);
+        for (int x = 0; x < BUFFER_SIZE; x += 50) {
+            vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255);
         }
         for (int y = 0; y < 480; y += 50) {
             hlineRGBA(renderer, 0, 5, y, 255, 255, 255, 255);
