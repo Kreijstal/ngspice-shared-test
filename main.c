@@ -58,6 +58,13 @@ int main(int argc, char* argv[]) {
     // Callback function to update plot buffers with simulation data
     void handle_simulation_data(SimulationData* data, void* user_data) {
         SignalValues new_values;
+        // Update num_signals on first callback
+        static bool first_callback = true;
+        if (first_callback) {
+            config.num_signals = data->num_signals < 15 ? data->num_signals : 15;
+            first_callback = false;
+        }
+        
         for (int i = 1; i < data->num_signals && i < 15; i++) {
             new_values.values[i] = data->signal_values[i];
         }

@@ -37,7 +37,7 @@ void update_slider_value(Slider* slider, int x) {
 
 PlotConfig setup_config() {
     PlotConfig config = {
-        .num_signals = 15,  // Maximum number of signals supported
+        .num_signals = 0,  // Will be set when first data arrives
         .time_increment = 0.1,
         .window_width = 640,
         .window_height = 480,
