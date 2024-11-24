@@ -16,12 +16,17 @@ sudo apt install build-essential libngspice0 libngspice0-dev libsdl2-dev libsdl2
 
 Unter Arch Linux installieren Sie die benötigten Pakete mit:
 ```bash
-sudo pacman -S ngspice sdl2_gfx gcc make
+sudo pacman -S ngspice sdl2_gfx base-devel --needed
 ```
 
 Unter Windows mit MSYS2 installieren Sie die benötigten Pakete mit:
 ```bash
-pacboy -S ngspice:p SDL2_gfx:p cc:p
+pacboy -S ngspice:p SDL2_gfx:p cc:p pkgconf:p --needed 
+```
+
+Mit brew
+```bash
+brew install ngspice sdl2_gfx pkgconf
 ```
 
 ## Kompilierung
