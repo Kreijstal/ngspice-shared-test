@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
         "Rres1 k y 1.0Ohm",
         ".options TEMP = 25C",
         ".options TNOM = 25C",
-        ".tran 0.0001s 12s 0s uic",
+        ".tran 0.0001s 120s 0s uic",
         ".end",
         NULL
     };
