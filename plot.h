@@ -47,4 +47,15 @@ PlotConfig setup_config(void);
 SignalValues get_new_values(double t, PlotConfig* config);
 void update_buffers(double** buffers, SignalValues values, PlotConfig* config);
 
+// SDL initialization functions
+SDL_Window* init_sdl(PlotConfig* config);
+SDL_Renderer* create_renderer(SDL_Window* window);
+double** init_buffers(void);
+
+// Drawing functions
+void draw_grid(SDL_Renderer* renderer, PlotConfig* config);
+void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation);
+void handle_events(SDL_Event* e, PlotConfig* config, int* quit, int* useInterpolation);
+void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers);
+
 #endif // PLOT_H

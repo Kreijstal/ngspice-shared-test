@@ -66,6 +66,109 @@ SignalValues get_new_values(double t, PlotConfig* config) {
     return values;
 }
 
+SDL_Window* init_sdl(PlotConfig* config) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("SDL konnte nicht initialisiert werden! SDL Fehler: %s\n", SDL_GetError());
+        return NULL;
+    }
+
+    SDL_Window* window = SDL_CreateWindow("Red Circle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                                        config->window_width, config->window_height, SDL_WINDOW_SHOWN);
+    if (window == NULL) {
+        printf("Fenster konnte nicht erstellt werden! SDL Fehler: %s\n", SDL_GetError());
+        SDL_Quit();
+    }
+    return window;
+}
+
+SDL_Renderer* create_renderer(SDL_Window* window) {
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL) {
+        printf("Renderer konnte nicht erstellt werden! SDL Fehler: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+    }
+    return renderer;
+}
+
+double** init_buffers(void) {
+    double** buffers = malloc(NUM_SIGNALS * sizeof(double*));
+    for (int j = 0; j < NUM_SIGNALS; j++) {
+        buffers[j] = malloc(BUFFER_SIZE * sizeof(double));
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            buffers[j][i] = 0.0;
+        }
+    }
+    return buffers;
+}
+
+void draw_grid(SDL_Renderer* renderer, PlotConfig* config) {
+    hlineRGBA(renderer, 0, 639, 479, 255, 255, 255, 255);
+    vlineRGBA(renderer, 0, 0, 479, 255, 255, 255, 255);
+    
+    for (int x = -config->tick_counter; x < BUFFER_SIZE; x += 50) {
+        if (x >= 0) {
+            vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255);
+        }
+    }
+    for (int y = 0; y < 480; y += 50) {
+        hlineRGBA(renderer, 0, 5, y, 255, 255, 255, 255);
+    }
+}
+
+void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation) {
+    if (useInterpolation) {
+        for (int x = 0; x < BUFFER_SIZE - 1; x++) {
+            int y1[NUM_SIGNALS], y2[NUM_SIGNALS];
+            for (int s = 0; s < NUM_SIGNALS; s++) {
+                y1[s] = config->center_y + (int)(buffers[s][x] * config->amplitude);
+                y2[s] = config->center_y + (int)(buffers[s][x + 1] * config->amplitude);
+            }
+            drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
+        }
+    } else {
+        for (int x = 0; x < BUFFER_SIZE; x++) {
+            for (int s = 0; s < NUM_SIGNALS; s++) {
+                int y = config->center_y + (int)(buffers[s][x] * config->amplitude);
+                pixelRGBA(renderer, x, y, 
+                         config->colors[s].r, config->colors[s].g, 
+                         config->colors[s].b, config->colors[s].a);
+            }
+        }
+    }
+}
+
+void handle_events(SDL_Event* e, PlotConfig* config, int* quit, int* useInterpolation) {
+    if (e->type == SDL_QUIT) {
+        *quit = 1;
+    } else if (e->type == SDL_KEYDOWN) {
+        if (e->key.keysym.sym == SDLK_i) {
+            *useInterpolation = !(*useInterpolation);
+        }
+    } else if (e->type == SDL_MOUSEBUTTONDOWN) {
+        if (is_point_in_slider(&config->amplitude_slider, e->button.x, e->button.y)) {
+            config->amplitude_slider.dragging = true;
+            update_slider_value(&config->amplitude_slider, e->button.x);
+        }
+    } else if (e->type == SDL_MOUSEBUTTONUP) {
+        config->amplitude_slider.dragging = false;
+    } else if (e->type == SDL_MOUSEMOTION) {
+        if (config->amplitude_slider.dragging) {
+            update_slider_value(&config->amplitude_slider, e->motion.x);
+        }
+    }
+}
+
+void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers) {
+    for (int i = 0; i < NUM_SIGNALS; i++) {
+        free(buffers[i]);
+    }
+    free(buffers);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
 void update_buffers(double** buffers, SignalValues values, PlotConfig* config) {
     for (int i = 0; i < NUM_SIGNALS; i++) {
         memmove(buffers[i], buffers[i] + 1, (BUFFER_SIZE - 1) * sizeof(double));
