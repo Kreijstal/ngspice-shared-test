@@ -1,43 +1,33 @@
-# ngspice Simulation Project
+# ngspice Echtzeit-Simulationsprojekt
 
-Dieses Projekt demonstriert die Verwendung von ngspice zur Simulation eines einfachen Schaltkreises. Die Simulation wird in C geschrieben und verwendet die ngspice Shared Library.
+Dieses Projekt demonstriert die Verwendung von ngspice zur Echtzeit-Simulation eines Schaltkreises. Die Simulation wird in C geschrieben und verwendet die ngspice Shared Library mit einer interaktiven SDL2-Benutzeroberfläche zur Echtzeitvisualisierung.
 
 ## Voraussetzungen
 
-- ngspice
+- ngspice mit Shared Library Support
 - gcc oder clang
 - make
+- SDL2 und SDL2_gfx Entwicklungsbibliotheken
+
+Unter Ubuntu/Debian können Sie die benötigten Pakete wie folgt installieren:
+```bash
+sudo apt install build-essential libngspice0 libngspice0-dev libsdl2-dev libsdl2-gfx-dev
+```
 
 ## Kompilierung
 
-Verwenden Sie `make`, um das Projekt zu kompilieren:
+Das Projekt wird mit `make` kompiliert:
 
 ```bash
 make
 ```
 
-Sie können auch eigene Compiler- und Linker-Flags verwenden:
-
-```bash
-make CFLAGS="-I/path/to/include" LDFLAGS="-L/path/to/lib"
-```
-
 ## Ausführung
 
-Führen Sie die Simulation mit dem folgenden Befehl aus:
+Starten Sie die interaktive Simulation mit:
 
 ```bash
-./simulation
+./simulation_plot
 ```
 
-Die Simulationsergebnisse werden in der Datei `simulation_data.csv` gespeichert.
-
-## Plotten der Ergebnisse
-
-Verwenden Sie das Python-Skript `plot_simulation.py`, um die Ergebnisse zu plotten:
-
-```bash
-python3 plot_simulation.py
-```
-
-Dies erzeugt eine PNG-Datei namens `simulation_plot.png` mit den Simulationsergebnissen.
+Die Simulation wird in Echtzeit ausgeführt und in einem SDL2-Fenster angezeigt. Sie können die Simulationsparameter über die Schieberegler in der Benutzeroberfläche anpassen.
