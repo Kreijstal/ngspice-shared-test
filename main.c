@@ -30,7 +30,6 @@ int main(int argc, char* argv[]) {
     int quit = 0;
     SDL_Event e;
     int useInterpolation = 1;
-    double t = 0.0;
 
   //ngspice
 
@@ -79,7 +78,6 @@ int main(int argc, char* argv[]) {
             plot_idx++;
         }
         // Update number of actual signals being plotted
-        new_values.num_signals = plot_idx;  // Set the actual number of plotted signals
         if (first_callback) {
             config.num_signals = plot_idx;
         }
