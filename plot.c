@@ -142,8 +142,8 @@ void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, 
             int* y2 = malloc(config->num_signals * sizeof(int));
             
             for (int s = 0; s < config->num_signals; s++) {
-                y1[s] = config->center_y + (int)(buffers[s][buffer_idx] * config->amplitude);
-                y2[s] = config->center_y + (int)(buffers[s][next_buffer_idx] * config->amplitude);
+                y1[s] = config->center_y - (int)(buffers[s][buffer_idx] * config->amplitude);
+                y2[s] = config->center_y - (int)(buffers[s][next_buffer_idx] * config->amplitude);
             }
             
             drawLine(renderer, x, y1, x + 1, y2, config);
@@ -156,7 +156,7 @@ void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, 
             if (buffer_idx >= BUFFER_SIZE) break;
             
             for (int s = 0; s < config->num_signals; s++) {
-                int y = config->center_y + (int)(buffers[s][buffer_idx] * config->amplitude);
+                int y = config->center_y - (int)(buffers[s][buffer_idx] * config->amplitude);
                 pixelRGBA(renderer, x, y,
                          config->colors[s].r, config->colors[s].g, 
                          config->colors[s].b, config->colors[s].a);
