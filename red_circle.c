@@ -2,8 +2,26 @@
 #include <SDL2_gfxPrimitives.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BUFFER_SIZE 640
+
+void update_values(double* sin_buffer, double* cos_buffer, double new_val) {
+    memmove(sin_buffer, sin_buffer + 1, (BUFFER_SIZE - 1) * sizeof(double));
+    memmove(cos_buffer, cos_buffer + 1, (BUFFER_SIZE - 1) * sizeof(double));
+    sin_buffer[BUFFER_SIZE - 1] = sin(new_val);
+    cos_buffer[BUFFER_SIZE - 1] = cos(new_val);
+}
 
 int main(int argc, char* argv[]) {
+    double sin_buffer[BUFFER_SIZE];
+    double cos_buffer[BUFFER_SIZE];
+
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        sin_buffer[i] = sin(i * 0.1);
+        cos_buffer[i] = cos(i * 0.1);
+    }
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL konnte nicht initialisiert werden! SDL Fehler: %s\n", SDL_GetError());
         return 1;
@@ -24,24 +42,41 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    for (int x = 0; x < 640; x++) {
-        int y_sin = 240 + (int)(sin(x * 0.01) * 100); // Sine wave in red
-        int y_cos = 240 + (int)(cos(x * 0.01) * 100); // Cosine wave in yellow
-        pixelRGBA(renderer, x, y_sin, 255, 0, 0, 255);
-        pixelRGBA(renderer, x, y_cos, 255, 255, 0, 255);
-    }
+    int quit = 0;
+    SDL_Event e;
+    double t = BUFFER_SIZE * 0.1;
 
-    hlineRGBA(renderer, 0, 639, 479, 255, 255, 255, 255); // X-axis in white at bottom
-    vlineRGBA(renderer, 0, 0, 479, 255, 255, 255, 255); // Y-axis in white at left
-    for (int x = 0; x < 640; x += 50) {
-        vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255); // Ticks on x-axis
-    }
-    for (int y = 0; y < 480; y += 50) {
-        hlineRGBA(renderer, 0, 5, y, 255, 255, 255, 255); // Ticks on y-axis
-    }
-    SDL_RenderPresent(renderer);
+    while (!quit) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                quit = 1;
+            }
+        }
 
-    SDL_Delay(5000); // Warte 5 Sekunden
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        for (int x = 0; x < BUFFER_SIZE; x++) {
+            int y_sin = 240 + (int)(sin_buffer[x] * 100);
+            int y_cos = 240 + (int)(cos_buffer[x] * 100);
+            pixelRGBA(renderer, x, y_sin, 255, 0, 0, 255);
+            pixelRGBA(renderer, x, y_cos, 255, 255, 0, 255);
+        }
+
+        hlineRGBA(renderer, 0, 639, 479, 255, 255, 255, 255);
+        vlineRGBA(renderer, 0, 0, 479, 255, 255, 255, 255);
+        for (int x = 0; x < BUFFER_SIZE; x += 50) {
+            vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255);
+        }
+        for (int y = 0; y < 480; y += 50) {
+            hlineRGBA(renderer, 0, 5, y, 255, 255, 255, 255);
+        }
+
+        SDL_RenderPresent(renderer);
+        update_values(sin_buffer, cos_buffer, t);
+        t += 0.1;
+        SDL_Delay(100);
+    }
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
