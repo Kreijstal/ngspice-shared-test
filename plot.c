@@ -90,7 +90,7 @@ SDL_Window* init_sdl(PlotConfig* config) {
         return NULL;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Red Circle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+    SDL_Window* window = SDL_CreateWindow("NgSpice interactive simulation", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
                                         config->window_width, config->window_height, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Fenster konnte nicht erstellt werden! SDL Fehler: %s\n", SDL_GetError());
