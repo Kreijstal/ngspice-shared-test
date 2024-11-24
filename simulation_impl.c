@@ -1,5 +1,8 @@
 #include "simulation.h"
 #include <stdlib.h>
+
+// Initialize debug level to ERROR by default
+DebugLevel current_debug_level = DEBUG_ERROR;
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -73,7 +76,7 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
     
     if (!vecdata || !vecdata->vecsa) {
-        printf("Error: Received null vector data\n");
+        DEBUG_PRINT(DEBUG_ERROR, "Received null vector data");
         return 0;
     }
 
@@ -94,11 +97,11 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     }
     
     if (timeValue) {
-        printf("\nTime = %g\n", timeValue->creal);
+        DEBUG_PRINT(DEBUG_VERBOSE, "Time = %g", timeValue->creal);
         
         if (!context->voltage_altered && !context->should_alter_voltage && timeValue->creal >= 6.0) {
             context->should_alter_voltage = true;
-            printf("Time threshold reached at t=%g, preparing to alter voltage\n", timeValue->creal);
+            DEBUG_PRINT(DEBUG_INFO, "Time threshold reached at t=%g, preparing to alter voltage", timeValue->creal);
         }
         
         fprintf(context->csv_file, "%g", timeValue->creal);
@@ -161,15 +164,15 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
     
     if (!initdata) {
-        printf("Error: Received null initialization data\n");
+        DEBUG_PRINT(DEBUG_ERROR, "Received null initialization data");
         return 0;
     }
 
-    printf("\nSimulation initialization\n\n");
-    printf("Plot name: %s\n", initdata->name ? initdata->name : "unknown");
-    printf("Title: %s\n", initdata->title ? initdata->title : "untitled");
-    printf("Date: %s\n", initdata->date ? initdata->date : "unknown");
-    printf("Type: %s\n", initdata->type ? initdata->type : "unknown");
+    DEBUG_PRINT(DEBUG_INFO, "Simulation initialization");
+    DEBUG_PRINT(DEBUG_INFO, "Plot name: %s", initdata->name ? initdata->name : "unknown");
+    DEBUG_PRINT(DEBUG_INFO, "Title: %s", initdata->title ? initdata->title : "untitled");
+    DEBUG_PRINT(DEBUG_INFO, "Date: %s", initdata->date ? initdata->date : "unknown");
+    DEBUG_PRINT(DEBUG_INFO, "Type: %s", initdata->type ? initdata->type : "unknown");
     
     printf("\nAvailable vectors:\n\n");
     for (int i = 0; i < initdata->veccount; i++) {
@@ -202,6 +205,6 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
 int ng_bgrunning(NG_BOOL running, int ident, void* userdata) {
     SimContext* context = (SimContext*)userdata;
     context->is_bg_running = !running;
-    printf("Background thread status: %s\n", !running ? "running" : "stopped");
+    DEBUG_PRINT(DEBUG_INFO, "Background thread status: %s", !running ? "running" : "stopped");
     return 0;
 }

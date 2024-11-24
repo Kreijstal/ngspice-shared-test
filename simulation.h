@@ -5,6 +5,31 @@
 #include <ngspice/sharedspice.h>
 #include <stdio.h>
 
+// Debug levels
+typedef enum {
+    DEBUG_NONE = 0,
+    DEBUG_ERROR = 1,
+    DEBUG_WARN = 2,
+    DEBUG_INFO = 3,
+    DEBUG_VERBOSE = 4,
+    DEBUG_TRACE = 5
+} DebugLevel;
+
+extern DebugLevel current_debug_level;
+
+#define DEBUG_PRINT(level, fmt, ...) \
+    do { \
+        if (level <= current_debug_level) { \
+            printf("[%s] " fmt "\n", \
+                   level == DEBUG_ERROR ? "ERROR" : \
+                   level == DEBUG_WARN ? "WARN" : \
+                   level == DEBUG_INFO ? "INFO" : \
+                   level == DEBUG_VERBOSE ? "VERBOSE" : \
+                   level == DEBUG_TRACE ? "TRACE" : "UNKNOWN", \
+                   ##__VA_ARGS__); \
+        } \
+    } while (0)
+
 // Structure to hold simulation context
 // Structure to hold simulation vector data
 typedef struct {
