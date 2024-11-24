@@ -123,23 +123,28 @@ void draw_grid(SDL_Renderer* renderer, PlotConfig* config) {
 }
 
 void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation) {
+    float x_scale = (float)config->window_width / BUFFER_SIZE;
+    
     if (useInterpolation) {
-        for (int x = 0; x < BUFFER_SIZE - 1; x++) {
+        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
             int* y1 = malloc(config->num_signals * sizeof(int));
             int* y2 = malloc(config->num_signals * sizeof(int));
             for (int s = 0; s < config->num_signals; s++) {
-                y1[s] = config->center_y + (int)(buffers[s][x] * config->amplitude);
-                y2[s] = config->center_y + (int)(buffers[s][x + 1] * config->amplitude);
+                y1[s] = config->center_y + (int)(buffers[s][i] * config->amplitude);
+                y2[s] = config->center_y + (int)(buffers[s][i + 1] * config->amplitude);
             }
-            drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
+            int x1 = (int)(i * x_scale);
+            int x2 = (int)((i + 1) * x_scale);
+            drawLine(renderer, x1, y1[0], x2, y2[0], y1[1], y2[1]);
             free(y1);
             free(y2);
         }
     } else {
-        for (int x = 0; x < BUFFER_SIZE; x++) {
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            int x = (int)(i * x_scale);
             for (int s = 0; s < config->num_signals; s++) {
-                int y = config->center_y + (int)(buffers[s][x] * config->amplitude);
-                pixelRGBA(renderer, x, y, 
+                int y = config->center_y + (int)(buffers[s][i] * config->amplitude);
+                pixelRGBA(renderer, x, y,
                          config->colors[s].r, config->colors[s].g, 
                          config->colors[s].b, config->colors[s].a);
             }
