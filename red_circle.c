@@ -9,6 +9,17 @@
 #define NUM_SIGNALS 2
 
 typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+    int value;
+    int min_value;
+    int max_value;
+    bool dragging;
+} Slider;
+
+typedef struct {
     double time_increment;
     int window_width;
     int window_height;
@@ -16,6 +27,7 @@ typedef struct {
     int amplitude;
     SDL_Color colors[NUM_SIGNALS];
     int delay_ms;
+    Slider amplitude_slider;
 } PlotConfig;
 
 typedef struct {
@@ -25,6 +37,33 @@ typedef struct {
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int y_cos1, int y_cos2) {
     lineRGBA(renderer, x1, y1, x2, y2, 255, 255, 0, 255); // Yellow for sine
     lineRGBA(renderer, x1, y_cos1, x2, y_cos2, 255, 0, 0, 255); // Red for cosine
+}
+
+void draw_slider(SDL_Renderer* renderer, Slider* slider) {
+    // Draw slider track
+    boxRGBA(renderer, slider->x, slider->y + slider->height/2 - 2,
+            slider->x + slider->width, slider->y + slider->height/2 + 2,
+            100, 100, 100, 255);
+    
+    // Draw slider handle
+    int handle_pos = slider->x + (slider->value - slider->min_value) * slider->width / 
+                     (slider->max_value - slider->min_value);
+    boxRGBA(renderer, handle_pos - 5, slider->y,
+            handle_pos + 5, slider->y + slider->height,
+            200, 200, 200, 255);
+}
+
+bool is_point_in_slider(Slider* slider, int x, int y) {
+    return x >= slider->x && x <= slider->x + slider->width &&
+           y >= slider->y && y <= slider->y + slider->height;
+}
+
+void update_slider_value(Slider* slider, int x) {
+    int relative_x = x - slider->x;
+    slider->value = slider->min_value + 
+                   (relative_x * (slider->max_value - slider->min_value)) / slider->width;
+    if (slider->value < slider->min_value) slider->value = slider->min_value;
+    if (slider->value > slider->max_value) slider->value = slider->max_value;
 }
 
 PlotConfig setup_config() {
@@ -38,7 +77,17 @@ PlotConfig setup_config() {
             {255, 255, 0, 255},  // Yellow for first signal
             {255, 0, 0, 255}     // Red for second signal
         },
-        .delay_ms = 100
+        .delay_ms = 100,
+        .amplitude_slider = {
+            .x = 50,
+            .y = 20,
+            .width = 200,
+            .height = 20,
+            .value = 100,
+            .min_value = 10,
+            .max_value = 200,
+            .dragging = false
+        }
     };
     return config;
 }
@@ -113,8 +162,9 @@ int main(int argc, char* argv[]) {
             for (int x = 0; x < BUFFER_SIZE - 1; x++) {
                 int y1[NUM_SIGNALS], y2[NUM_SIGNALS];
                 for (int s = 0; s < NUM_SIGNALS; s++) {
-                    y1[s] = config.center_y + (int)(buffers[s][x] * config.amplitude);
-                    y2[s] = config.center_y + (int)(buffers[s][x + 1] * config.amplitude);
+                    int amp = (s == 0) ? config.amplitude_slider.value : config.amplitude;
+                    y1[s] = config.center_y + (int)(buffers[s][x] * amp);
+                    y2[s] = config.center_y + (int)(buffers[s][x + 1] * amp);
                 }
                 drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
             }
@@ -140,6 +190,9 @@ int main(int argc, char* argv[]) {
             hlineRGBA(renderer, 0, 5, y, 255, 255, 255, 255);
         }
 
+        // Draw the amplitude slider
+        draw_slider(renderer, &config.amplitude_slider);
+        
         SDL_RenderPresent(renderer);
         SignalValues new_vals = get_new_values(t);
         update_buffers(buffers, new_vals);
