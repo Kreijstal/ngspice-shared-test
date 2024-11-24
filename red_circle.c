@@ -6,33 +6,76 @@
 #include <string.h>
 
 #define BUFFER_SIZE 640
+#define NUM_SIGNALS 2
+
+typedef struct {
+    double time_increment;
+    int window_width;
+    int window_height;
+    int center_y;
+    int amplitude;
+    SDL_Color colors[NUM_SIGNALS];
+    int delay_ms;
+} PlotConfig;
+
+typedef struct {
+    double values[NUM_SIGNALS];
+} SignalValues;
 
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int y_cos1, int y_cos2) {
     lineRGBA(renderer, x1, y1, x2, y2, 255, 255, 0, 255); // Yellow for sine
     lineRGBA(renderer, x1, y_cos1, x2, y_cos2, 255, 0, 0, 255); // Red for cosine
 }
 
-void update_values(double* sin_buffer, double* cos_buffer, double new_val) {
-    memmove(sin_buffer, sin_buffer + 1, (BUFFER_SIZE - 1) * sizeof(double));
-    memmove(cos_buffer, cos_buffer + 1, (BUFFER_SIZE - 1) * sizeof(double));
-    sin_buffer[BUFFER_SIZE - 1] = sin(new_val);
-    cos_buffer[BUFFER_SIZE - 1] = cos(new_val);
+PlotConfig setup_config() {
+    PlotConfig config = {
+        .time_increment = 0.1,
+        .window_width = 640,
+        .window_height = 480,
+        .center_y = 240,
+        .amplitude = 100,
+        .colors = {
+            {255, 255, 0, 255},  // Yellow for first signal
+            {255, 0, 0, 255}     // Red for second signal
+        },
+        .delay_ms = 100
+    };
+    return config;
+}
+
+SignalValues get_new_values(double t) {
+    SignalValues values;
+    values.values[0] = sin(t);  // First signal: sine
+    values.values[1] = cos(t);  // Second signal: cosine
+    return values;
+}
+
+void update_buffers(double** buffers, SignalValues new_vals) {
+    for (int i = 0; i < NUM_SIGNALS; i++) {
+        memmove(buffers[i], buffers[i] + 1, (BUFFER_SIZE - 1) * sizeof(double));
+        buffers[i][BUFFER_SIZE - 1] = new_vals.values[i];
+    }
 }
 
 int main(int argc, char* argv[]) {
-    double sin_buffer[BUFFER_SIZE];
-    double cos_buffer[BUFFER_SIZE];
-
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        sin_buffer[i] = sin(i * 0.1);
-        cos_buffer[i] = cos(i * 0.1);
+    PlotConfig config = setup_config();
+    
+    // Allocate buffers for all signals
+    double* buffers[NUM_SIGNALS];
+    for (int j = 0; j < NUM_SIGNALS; j++) {
+        buffers[j] = malloc(BUFFER_SIZE * sizeof(double));
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            SignalValues vals = get_new_values(i * config.time_increment);
+            buffers[j][i] = vals.values[j];
+        }
     }
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL konnte nicht initialisiert werden! SDL Fehler: %s\n", SDL_GetError());
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Red Circle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("Red Circle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                                        config.window_width, config.window_height, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Fenster konnte nicht erstellt werden! SDL Fehler: %s\n", SDL_GetError());
         SDL_Quit();
@@ -68,18 +111,21 @@ int main(int argc, char* argv[]) {
 
         if (useInterpolation) {
             for (int x = 0; x < BUFFER_SIZE - 1; x++) {
-                int y_sin1 = 240 + (int)(sin_buffer[x] * 100);
-                int y_cos1 = 240 + (int)(cos_buffer[x] * 100);
-                int y_sin2 = 240 + (int)(sin_buffer[x + 1] * 100);
-                int y_cos2 = 240 + (int)(cos_buffer[x + 1] * 100);
-                drawLine(renderer, x, y_sin1, x + 1, y_sin2, y_cos1, y_cos2);
+                int y1[NUM_SIGNALS], y2[NUM_SIGNALS];
+                for (int s = 0; s < NUM_SIGNALS; s++) {
+                    y1[s] = config.center_y + (int)(buffers[s][x] * config.amplitude);
+                    y2[s] = config.center_y + (int)(buffers[s][x + 1] * config.amplitude);
+                }
+                drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
             }
         } else {
             for (int x = 0; x < BUFFER_SIZE; x++) {
-                int y_sin = 240 + (int)(sin_buffer[x] * 100);
-                int y_cos = 240 + (int)(cos_buffer[x] * 100);
-                pixelRGBA(renderer, x, y_sin, 255, 255, 0, 255); // Yellow for sine
-                pixelRGBA(renderer, x, y_cos, 255, 0, 0, 255); // Red for cosine
+                for (int s = 0; s < NUM_SIGNALS; s++) {
+                    int y = config.center_y + (int)(buffers[s][x] * config.amplitude);
+                    pixelRGBA(renderer, x, y, 
+                             config.colors[s].r, config.colors[s].g, 
+                             config.colors[s].b, config.colors[s].a);
+                }
             }
         }
         int tick_offset = (int)(t * 10) % 50;
@@ -95,11 +141,16 @@ int main(int argc, char* argv[]) {
         }
 
         SDL_RenderPresent(renderer);
-        update_values(sin_buffer, cos_buffer, t);
-        t += 0.1;
-        SDL_Delay(100);
+        SignalValues new_vals = get_new_values(t);
+        update_buffers(buffers, new_vals);
+        t += config.time_increment;
+        SDL_Delay(config.delay_ms);
     }
 
+    // Clean up
+    for (int i = 0; i < NUM_SIGNALS; i++) {
+        free(buffers[i]);
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
