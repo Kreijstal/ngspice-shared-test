@@ -1,6 +1,6 @@
 # Compiler settings
 CC ?= gcc
-CFLAGS ?= -Wall -I.
+CFLAGS ?= -Wall -g -I.
 LDFLAGS ?=
 
 # Check for required packages
