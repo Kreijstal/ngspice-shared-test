@@ -57,11 +57,20 @@ int main(int argc, char* argv[]) {
     // Callback function to update plot buffers with simulation data
     void handle_simulation_data(SimulationData* data, void* user_data) {
         SignalValues new_values;
-        // Update num_signals on first callback
         static bool first_callback = true;
+        
+        // Count actual signals (excluding #branch)
+        int plot_idx = 0;
+        for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
+            if (data->signal_names && data->signal_names[i] && 
+                strstr(data->signal_names[i], "#branch") == NULL) {
+                plot_idx++;
+            }
+        }
+        
         if (first_callback) {
-            config.num_signals = data->num_signals < 15 ? data->num_signals : 15;
-            buffers = init_buffers(&config);  // Initialize buffers here
+            config.num_signals = plot_idx;
+            buffers = init_buffers(&config);
             first_callback = false;
         }
         
