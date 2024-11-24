@@ -100,11 +100,11 @@ SignalValues get_new_values(double t) {
     return values;
 }
 
-void update_buffers(double** buffers, SignalValues new_vals) {
-    for (int i = 0; i < NUM_SIGNALS; i++) {
-        memmove(buffers[i], buffers[i] + 1, (BUFFER_SIZE - 1) * sizeof(double));
-        buffers[i][BUFFER_SIZE - 1] = new_vals.values[i];
-    }
+void update_buffers(double** buffers, double value1, double value2) {
+    memmove(buffers[0], buffers[0] + 1, (BUFFER_SIZE - 1) * sizeof(double));
+    memmove(buffers[1], buffers[1] + 1, (BUFFER_SIZE - 1) * sizeof(double));
+    buffers[0][BUFFER_SIZE - 1] = value1;
+    buffers[1][BUFFER_SIZE - 1] = value2;
 }
 
 int main(int argc, char* argv[]) {
@@ -115,8 +115,7 @@ int main(int argc, char* argv[]) {
     for (int j = 0; j < NUM_SIGNALS; j++) {
         buffers[j] = malloc(BUFFER_SIZE * sizeof(double));
         for (int i = 0; i < BUFFER_SIZE; i++) {
-            SignalValues vals = get_new_values(i * config.time_increment);
-            buffers[j][i] = vals.values[j];
+            buffers[j][i] = 0.0;  // Initialize with zeros
         }
     }
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -142,7 +141,6 @@ int main(int argc, char* argv[]) {
 
     int quit = 0;
     SDL_Event e;
-    double t = BUFFER_SIZE * 0.1;
     int useInterpolation = 1;
 
     while (!quit) {
@@ -206,9 +204,6 @@ int main(int argc, char* argv[]) {
         draw_slider(renderer, &config.amplitude_slider);
         
         SDL_RenderPresent(renderer);
-        SignalValues new_vals = get_new_values(t);
-        update_buffers(buffers, new_vals);
-        t += config.time_increment;
         SDL_Delay(config.delay_ms);
     }
 
