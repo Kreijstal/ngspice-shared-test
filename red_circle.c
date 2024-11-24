@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2_gfxPrimitives.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
