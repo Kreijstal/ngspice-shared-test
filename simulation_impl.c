@@ -56,7 +56,7 @@ int ng_getstat(char* outputstat, int ident, void* userdata) {
         }
     }
 
-    printf("Status: %s (Progress: %d%%)\n", outputstat, context->current_progress);
+    DEBUG_PRINT(DEBUG_INFO, "Status: %s (Progress: %d%%)", outputstat, context->current_progress);
     return 0;
 }
 
