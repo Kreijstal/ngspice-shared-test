@@ -12,7 +12,7 @@ LIBS = -lngspice $(SDL2_GFX_LIBS) -lm `sdl2-config --cflags --libs`
 CFLAGS += $(SDL2_GFX_CFLAGS)
 
 # Source files
-SRCS = main.c plot.c simulation.c simulation_impl.c
+SRCS = main.c plot.c simulation.c
 OBJS = $(SRCS:.c=.o)
 
 # Target
