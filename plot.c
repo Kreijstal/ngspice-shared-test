@@ -123,27 +123,36 @@ void draw_grid(SDL_Renderer* renderer, PlotConfig* config) {
 }
 
 void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation) {
-    float x_scale = (float)config->window_width / BUFFER_SIZE;
+    // Calculate decimation factor - how many samples to skip per pixel
+    int decimation = (BUFFER_SIZE + config->window_width - 1) / config->window_width;
+    if (decimation < 1) decimation = 1;
     
     if (useInterpolation) {
-        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
+        for (int x = 0; x < config->window_width - 1; x++) {
+            int buffer_idx = x * decimation;
+            int next_buffer_idx = (x + 1) * decimation;
+            
+            if (next_buffer_idx >= BUFFER_SIZE) break;
+            
             int* y1 = malloc(config->num_signals * sizeof(int));
             int* y2 = malloc(config->num_signals * sizeof(int));
+            
             for (int s = 0; s < config->num_signals; s++) {
-                y1[s] = config->center_y + (int)(buffers[s][i] * config->amplitude);
-                y2[s] = config->center_y + (int)(buffers[s][i + 1] * config->amplitude);
+                y1[s] = config->center_y + (int)(buffers[s][buffer_idx] * config->amplitude);
+                y2[s] = config->center_y + (int)(buffers[s][next_buffer_idx] * config->amplitude);
             }
-            int x1 = (int)(i * x_scale);
-            int x2 = (int)((i + 1) * x_scale);
-            drawLine(renderer, x1, y1[0], x2, y2[0], y1[1], y2[1]);
+            
+            drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
             free(y1);
             free(y2);
         }
     } else {
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            int x = (int)(i * x_scale);
+        for (int x = 0; x < config->window_width; x++) {
+            int buffer_idx = x * decimation;
+            if (buffer_idx >= BUFFER_SIZE) break;
+            
             for (int s = 0; s < config->num_signals; s++) {
-                int y = config->center_y + (int)(buffers[s][i] * config->amplitude);
+                int y = config->center_y + (int)(buffers[s][buffer_idx] * config->amplitude);
                 pixelRGBA(renderer, x, y,
                          config->colors[s].r, config->colors[s].g, 
                          config->colors[s].b, config->colors[s].a);
