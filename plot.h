@@ -29,13 +29,13 @@ typedef struct {
     int center_y;
     int amplitude;
     int num_signals;
-    SDL_Color colors[2];  // Fixed size for now - could be made dynamic later
+    SDL_Color colors[15];  // Basic color palette for plotting
     Slider amplitude_slider;
     int tick_counter;
 } PlotConfig;
 
 typedef struct {
-    double values[2];  // Fixed size matching colors array
+    double values[15];  // Fixed size matching colors array
 } SignalValues;
 
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int y_cos1, int y_cos2);

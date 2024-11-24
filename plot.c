@@ -41,8 +41,21 @@ PlotConfig setup_config() {
         .center_y = 240,
         .amplitude = 100,
         .colors = {
-            {255, 255, 0, 255},  // Yellow for first signal
-            {255, 0, 0, 255}     // Red for second signal
+            {255, 255, 0, 255},   // Yellow
+            {255, 0, 0, 255},     // Red
+            {0, 255, 0, 255},     // Green
+            {0, 0, 255, 255},     // Blue
+            {255, 0, 255, 255},   // Magenta
+            {0, 255, 255, 255},   // Cyan
+            {255, 128, 0, 255},   // Orange
+            {128, 0, 255, 255},   // Purple
+            {0, 255, 128, 255},   // Spring Green
+            {255, 255, 255, 255}, // White
+            {128, 128, 255, 255}, // Light Blue
+            {255, 128, 128, 255}, // Light Red
+            {128, 255, 128, 255}, // Light Green
+            {255, 128, 255, 255}, // Light Magenta
+            {192, 192, 192, 255}  // Light Gray
         },
         .amplitude_slider = {
             .x = 50,
