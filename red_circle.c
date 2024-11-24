@@ -8,8 +8,8 @@
 #define BUFFER_SIZE 640
 
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2) {
-    lineRGBA(renderer, x1, y1, x2, y2, 255, 0, 0, 255); // Red for sine
-    lineRGBA(renderer, x1, y1 + (y2 - y1), x2, y2 + (y2 - y1), 255, 255, 0, 255); // Yellow for cosine
+    lineRGBA(renderer, x1, y1, x2, y2, 255, 255, 0, 255); // Yellow for sine
+    lineRGBA(renderer, x1, y1 + (y2 - y1), x2, y2 + (y2 - y1), 255, 0, 0, 255); // Red for cosine
 }
 
 void update_values(double* sin_buffer, double* cos_buffer, double new_val) {
@@ -50,24 +50,38 @@ int main(int argc, char* argv[]) {
     int quit = 0;
     SDL_Event e;
     double t = BUFFER_SIZE * 0.1;
+    int useInterpolation = 1;
 
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
                 quit = 1;
+            } else if (e.type == SDL_KEYDOWN) {
+                if (e.key.keysym.sym == SDLK_i) {
+                    useInterpolation = !useInterpolation;
+                }
             }
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        for (int x = 0; x < BUFFER_SIZE - 1; x++) {
-            int y_sin1 = 240 + (int)(sin_buffer[x] * 100);
-            int y_cos1 = 240 + (int)(cos_buffer[x] * 100);
-            int y_sin2 = 240 + (int)(sin_buffer[x + 1] * 100);
-            int y_cos2 = 240 + (int)(cos_buffer[x + 1] * 100);
-            drawLine(renderer, x, y_sin1, x + 1, y_sin2);
-            drawLine(renderer, x, y_cos1, x + 1, y_cos2);
+        if (useInterpolation) {
+            for (int x = 0; x < BUFFER_SIZE - 1; x++) {
+                int y_sin1 = 240 + (int)(sin_buffer[x] * 100);
+                int y_cos1 = 240 + (int)(cos_buffer[x] * 100);
+                int y_sin2 = 240 + (int)(sin_buffer[x + 1] * 100);
+                int y_cos2 = 240 + (int)(cos_buffer[x + 1] * 100);
+                drawLine(renderer, x, y_sin1, x + 1, y_sin2);
+                drawLine(renderer, x, y_cos1, x + 1, y_cos2);
+            }
+        } else {
+            for (int x = 0; x < BUFFER_SIZE; x++) {
+                int y_sin = 240 + (int)(sin_buffer[x] * 100);
+                int y_cos = 240 + (int)(cos_buffer[x] * 100);
+                pixelRGBA(renderer, x, y_sin, 255, 255, 0, 255); // Yellow for sine
+                pixelRGBA(renderer, x, y_cos, 255, 0, 0, 255); // Red for cosine
+            }
         }
         int tick_offset = (int)(t * 10) % 50;
 
