@@ -16,9 +16,9 @@ typedef struct {
     int y;
     int width;
     int height;
-    int value;
-    int min_value;
-    int max_value;
+    float value;
+    float min_value;
+    float max_value;
     bool dragging;
 } Slider;
 

@@ -11,7 +11,7 @@ extern SimContext* g_context;
 
 SignalValues get_new_values(double t, PlotConfig* config) {
     SignalValues values;
-    values.values[0] = sin(t) * (config->amplitude_slider.value / 100.0);  // First signal: sine with slider amplitude
+    values.values[0] = sin(t) * config->amplitude_slider.value;  // First signal: sine with slider amplitude
     values.values[1] = cos(t);  // Second signal: cosine
     return values;
 }

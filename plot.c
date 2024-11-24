@@ -28,9 +28,9 @@ bool is_point_in_slider(Slider* slider, int x, int y) {
 }
 
 void update_slider_value(Slider* slider, int x) {
-    int relative_x = x - slider->x;
+    float relative_x = (float)(x - slider->x);
     slider->value = slider->min_value + 
-                   (relative_x * (slider->max_value - slider->min_value)) / slider->width;
+                   (relative_x * (slider->max_value - slider->min_value)) / (float)slider->width;
     if (slider->value < slider->min_value) slider->value = slider->min_value;
     if (slider->value > slider->max_value) slider->value = slider->max_value;
 }
@@ -65,9 +65,9 @@ PlotConfig setup_config() {
             .y = 20,
             .width = 200,
             .height = 20,
-            .value = 100,
-            .min_value = 10,
-            .max_value = 200,
+            .value = 0.0f,
+            .min_value = -1.0f,
+            .max_value = 1.0f,
             .dragging = false
         },
         .tick_counter = 0
