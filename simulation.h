@@ -16,6 +16,9 @@ typedef struct {
     bool headers_written;
 } SimContext;
 
+// Global context pointer declaration
+extern SimContext* g_context;
+
 // Function declarations
 void signal_handler(int signum);
 int ng_getchar(char* outputchar, int ident, void* userdata);

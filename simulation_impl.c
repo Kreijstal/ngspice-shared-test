@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 // Global context pointer for signal handler
-static SimContext* g_context = NULL;
+SimContext* g_context = NULL;
 
 void signal_handler(int signum) {
     if (g_context && g_context->csv_file) {
