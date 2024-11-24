@@ -102,11 +102,11 @@ SignalValues get_new_values(double t) {
     return values;
 }
 
-void update_buffers(double** buffers, double value1, double value2, PlotConfig* config) {
-    memmove(buffers[0], buffers[0] + 1, (BUFFER_SIZE - 1) * sizeof(double));
-    memmove(buffers[1], buffers[1] + 1, (BUFFER_SIZE - 1) * sizeof(double));
-    buffers[0][BUFFER_SIZE - 1] = value1;
-    buffers[1][BUFFER_SIZE - 1] = value2;
+void update_buffers(double** buffers, SignalValues values, PlotConfig* config) {
+    for (int i = 0; i < NUM_SIGNALS; i++) {
+        memmove(buffers[i], buffers[i] + 1, (BUFFER_SIZE - 1) * sizeof(double));
+        buffers[i][BUFFER_SIZE - 1] = values.values[i];
+    }
     config->tick_counter = (config->tick_counter + 1) % 50;
 }
 
