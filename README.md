@@ -14,9 +14,14 @@ Unter Ubuntu/Debian können Sie die benötigten Pakete wie folgt installieren:
 sudo apt install build-essential libngspice0 libngspice0-dev libsdl2-dev libsdl2-gfx-dev
 ```
 
+Unter Arch Linux installieren Sie die benötigten Pakete mit:
+```bash
+sudo pacman -S ngspice sdl2_gfx gcc make
+```
+
 Unter Windows mit MSYS2 installieren Sie die benötigten Pakete mit:
 ```bash
-pacboy -S ngspice:p SDL2_gfx:p gcc:p
+pacboy -S ngspice:p SDL2_gfx:p cc:p
 ```
 
 ## Kompilierung
