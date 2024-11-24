@@ -188,8 +188,6 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        int tick_offset = (int)(t * 10) % 50;
-
         hlineRGBA(renderer, 0, 639, 479, 255, 255, 255, 255);
         vlineRGBA(renderer, 0, 0, 479, 255, 255, 255, 255);
         for (int x = -tick_offset; x < BUFFER_SIZE; x += 50) {
