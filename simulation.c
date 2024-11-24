@@ -31,9 +31,9 @@ int main() {
 
     // Example callback function
     void handle_simulation_data(SimulationData* data, void* user_data) {
-        printf("Received simulation data at time: %f\n", data->time);
-        for (int i = 0; i < data->count; i++) {
-            printf("  %s: %f\n", data->names[i], data->values[i]);
+        printf("Simulation time: %f\n", data->time);
+        for (int i = 0; i < data->num_signals; i++) {
+            printf("  Signal '%s': %f\n", data->signal_names[i], data->signal_values[i]);
         }
     }
 

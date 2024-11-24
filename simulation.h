@@ -8,10 +8,10 @@
 // Structure to hold simulation context
 // Structure to hold simulation vector data
 typedef struct {
-    double time;
-    double* values;
-    char** names;
-    int count;
+    double time;           // Current simulation time
+    int num_signals;       // Number of signals (excluding time)
+    char** signal_names;   // Array of signal names
+    double* signal_values; // Array of signal values at current time
 } SimulationData;
 
 // Callback function type

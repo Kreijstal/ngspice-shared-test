@@ -79,9 +79,9 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
 
     // Prepare simulation data for callback
     SimulationData sim_data = {0};
-    sim_data.count = vecdata->veccount - 1;  // Subtract 1 to exclude time
-    sim_data.values = malloc(sim_data.count * sizeof(double));
-    sim_data.names = malloc(sim_data.count * sizeof(char*));
+    sim_data.num_signals = vecdata->veccount - 1;  // Subtract 1 to exclude time
+    sim_data.signal_values = malloc(sim_data.num_signals * sizeof(double));
+    sim_data.signal_names = malloc(sim_data.num_signals * sizeof(char*));
 
     // Find the time vector
     pvecvalues timeValue = NULL;
@@ -128,7 +128,7 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     fflush(context->csv_file);
 
     // Fill simulation data
-    int value_index = 0;
+    int signal_index = 0;
     for (int i = 0; i < vecdata->veccount; i++) {
         pvecvalues value = vecdata->vecsa[i];
         if (!value || !value->name) continue;
@@ -136,9 +136,9 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         if (strcmp(value->name, "time") == 0) {
             sim_data.time = value->creal;
         } else {
-            sim_data.values[value_index] = value->creal;
-            sim_data.names[value_index] = strdup(value->name);
-            value_index++;
+            sim_data.signal_values[signal_index] = value->creal;
+            sim_data.signal_names[signal_index] = strdup(value->name);
+            signal_index++;
         }
     }
 
@@ -148,11 +148,11 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     }
 
     // Clean up
-    for (int i = 0; i < sim_data.count; i++) {
-        free(sim_data.names[i]);
+    for (int i = 0; i < sim_data.num_signals; i++) {
+        free(sim_data.signal_names[i]);
     }
-    free(sim_data.values);
-    free(sim_data.names);
+    free(sim_data.signal_values);
+    free(sim_data.signal_names);
     
     return 0;
 }
