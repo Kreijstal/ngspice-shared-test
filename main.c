@@ -35,6 +35,6 @@ int main(int argc, char* argv[]) {
         SDL_Delay(16); // Cap at roughly 60 FPS
     }
 
-    cleanup(renderer, window, buffers);
+    cleanup(renderer, window, buffers, &config);
     return 0;
 }

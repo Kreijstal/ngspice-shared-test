@@ -55,6 +55,6 @@ double** init_buffers(PlotConfig* config);
 void draw_grid(SDL_Renderer* renderer, PlotConfig* config);
 void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation);
 void handle_events(SDL_Event* e, PlotConfig* config, int* quit, int* useInterpolation);
-void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers);
+void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers, PlotConfig* config);
 
 #endif // PLOT_H

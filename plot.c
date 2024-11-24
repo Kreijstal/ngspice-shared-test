@@ -162,7 +162,7 @@ void handle_events(SDL_Event* e, PlotConfig* config, int* quit, int* useInterpol
     }
 }
 
-void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers) {
+void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers, PlotConfig* config) {
     for (int i = 0; i < config->num_signals; i++) {
         free(buffers[i]);
     }
