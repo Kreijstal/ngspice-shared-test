@@ -16,6 +16,50 @@ SignalValues get_new_values(double t, PlotConfig* config) {
     return values;
 }
 
+// Callback function to update plot buffers with simulation data
+void handle_simulation_data(SimulationData* data, void* user_data) {
+    static PlotConfig* config = NULL;
+    static double** buffers = NULL;
+    static bool first_callback = true;
+    SignalValues new_values;
+    
+    // Get the config on first call
+    if (!config) {
+        config = (PlotConfig*)user_data;
+    }
+    
+    if (!config) return;  // Safety check
+    
+    // Count and process actual signals (excluding #branch)
+    int plot_idx = 0;
+    if (first_callback) {
+        // First pass: count signals for initialization
+        for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
+            if (data->signal_names && data->signal_names[i] && 
+                strstr(data->signal_names[i], "#branch") == NULL) {
+                plot_idx++;
+            }
+        }
+        config->num_signals = plot_idx;
+        buffers = init_buffers(config);
+        first_callback = false;
+    }
+    
+    if (!buffers) return;  // Safety check
+    
+    // Second pass: fill in the values
+    plot_idx = 0;  // Reset counter for actual data processing
+    for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
+        if (data->signal_names && data->signal_names[i] && 
+            strstr(data->signal_names[i], "#branch") == NULL) {
+            new_values.values[plot_idx] = data->signal_values[i];
+            plot_idx++;
+        }
+    }
+    
+    update_buffers(buffers, new_values, config);
+}
+
 int main(int argc, char* argv[]) {
   //SDL2
     PlotConfig config = setup_config();
@@ -54,50 +98,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Callback function to update plot buffers with simulation data
-    void handle_simulation_data(SimulationData* data, void* user_data) {
-        SignalValues new_values;
-        static bool first_callback = true;
-        
-        // Count and process actual signals (excluding #branch)
-        int plot_idx = 0;
-        if (first_callback) {
-            // First pass: count signals for initialization
-            for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
-                if (data->signal_names && data->signal_names[i] && 
-                    strstr(data->signal_names[i], "#branch") == NULL) {
-                    plot_idx++;
-                }
-            }
-            config.num_signals = plot_idx;
-            buffers = init_buffers(&config);
-            first_callback = false;
-        }
-        
-        if (!buffers) return;  // Safety check
-        
-        // Second pass: fill in the values
-        plot_idx = 0;  // Reset counter for actual data processing
-        for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
-            if (data->signal_names && data->signal_names[i] && 
-                strstr(data->signal_names[i], "#branch") == NULL) {
-                new_values.values[plot_idx] = data->signal_values[i];
-                plot_idx++;
-            }
-        }
-        // Update number of actual signals being plotted
-        if (first_callback) {
-            config.num_signals = plot_idx;
-        }
-        update_buffers(buffers, new_values, &config);
-    }
 
     // Initialize ngspice
     int ret = ngSpice_Init(ng_getchar, ng_getstat, ng_exit,
                           ng_data, ng_initdata, ng_bgrunning, &context);
 
     // Set up the callback
-    set_simulation_callback(&context, handle_simulation_data, NULL);
+    set_simulation_callback(&context, handle_simulation_data, &config);
 
     if (ret != 0) {
         fprintf(stderr, "Error initializing ngspice\n");
