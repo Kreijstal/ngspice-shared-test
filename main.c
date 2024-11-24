@@ -17,33 +17,21 @@ SignalValues get_new_values(double t, PlotConfig* config) {
 }
 
 // Callback function to update plot buffers with simulation data
+typedef struct {
+    PlotConfig* config;
+    double** buffers;
+} CallbackData;
+
 void handle_simulation_data(SimulationData* data, void* user_data) {
-    static PlotConfig* config = NULL;
-    static double** buffers = NULL;
-    static bool first_callback = true;
+    CallbackData* cb_data = (CallbackData*)user_data;
+    PlotConfig* config = cb_data->config;
+    double** buffers = cb_data->buffers;
     SignalValues new_values;
     
-    // Get the config on first call
-    if (!config) {
-        config = (PlotConfig*)user_data;
-    }
-    
-    if (!config) return;  // Safety check
+    if (!config || !buffers) return;  // Safety check
     
     // Count and process actual signals (excluding #branch)
     int plot_idx = 0;
-    if (first_callback) {
-        // First pass: count signals for initialization
-        for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
-            if (data->signal_names && data->signal_names[i] && 
-                strstr(data->signal_names[i], "#branch") == NULL) {
-                plot_idx++;
-            }
-        }
-        config->num_signals = plot_idx;
-        buffers = init_buffers(config);
-        first_callback = false;
-    }
     
     if (!buffers) return;  // Safety check
     
@@ -63,7 +51,14 @@ void handle_simulation_data(SimulationData* data, void* user_data) {
 int main(int argc, char* argv[]) {
   //SDL2
     PlotConfig config = setup_config();
-    double** buffers = NULL;  // Will be initialized after first data
+    config.num_signals = 2;  // Initialize with default number of signals
+    double** buffers = init_buffers(&config);
+    
+    // Prepare callback data
+    CallbackData cb_data = {
+        .config = &config,
+        .buffers = buffers
+    };
     
     SDL_Window* window = init_sdl(&config);
     if (!window) return 1;
@@ -104,7 +99,7 @@ int main(int argc, char* argv[]) {
                           ng_data, ng_initdata, ng_bgrunning, &context);
 
     // Set up the callback
-    set_simulation_callback(&context, handle_simulation_data, &config);
+    set_simulation_callback(&context, handle_simulation_data, &cb_data);
 
     if (ret != 0) {
         fprintf(stderr, "Error initializing ngspice\n");
