@@ -7,6 +7,11 @@
 
 #define BUFFER_SIZE 640
 
+void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2) {
+    lineRGBA(renderer, x1, y1, x2, y2, 255, 0, 0, 255); // Red for sine
+    lineRGBA(renderer, x1, y1 + (y2 - y1), x2, y2 + (y2 - y1), 255, 255, 0, 255); // Yellow for cosine
+}
+
 void update_values(double* sin_buffer, double* cos_buffer, double new_val) {
     memmove(sin_buffer, sin_buffer + 1, (BUFFER_SIZE - 1) * sizeof(double));
     memmove(cos_buffer, cos_buffer + 1, (BUFFER_SIZE - 1) * sizeof(double));
@@ -56,17 +61,21 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        for (int x = 0; x < BUFFER_SIZE; x++) {
-            int y_sin = 240 + (int)(sin_buffer[x] * 100);
-            int y_cos = 240 + (int)(cos_buffer[x] * 100);
-            pixelRGBA(renderer, x, y_sin, 255, 0, 0, 255);
-            pixelRGBA(renderer, x, y_cos, 255, 255, 0, 255);
+        for (int x = 0; x < BUFFER_SIZE - 1; x++) {
+            int y_sin1 = 240 + (int)(sin_buffer[x] * 100);
+            int y_cos1 = 240 + (int)(cos_buffer[x] * 100);
+            int y_sin2 = 240 + (int)(sin_buffer[x + 1] * 100);
+            int y_cos2 = 240 + (int)(cos_buffer[x + 1] * 100);
+            drawLine(renderer, x, y_sin1, x + 1, y_sin2);
+            drawLine(renderer, x, y_cos1, x + 1, y_cos2);
         }
+        int tick_offset = (int)(t * 10) % 50;
 
         hlineRGBA(renderer, 0, 639, 479, 255, 255, 255, 255);
         vlineRGBA(renderer, 0, 0, 479, 255, 255, 255, 255);
-        for (int x = 0; x < BUFFER_SIZE; x += 50) {
-            vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255);
+        for (int x = -tick_offset; x < BUFFER_SIZE; x += 50) {
+            if (x >= 0)
+                vlineRGBA(renderer, x, 474, 479, 255, 255, 255, 255);
         }
         for (int y = 0; y < 480; y += 50) {
             hlineRGBA(renderer, 0, 5, y, 255, 255, 255, 255);
