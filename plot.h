@@ -10,9 +10,9 @@
 #include <string.h>
 
 #define BUFFER_SIZE 640
-#define NUM_SIGNALS 2
 
 typedef struct {
+    int num_signals;
     int x;
     int y;
     int width;
@@ -30,7 +30,6 @@ typedef struct {
     int center_y;
     int amplitude;
     SDL_Color colors[NUM_SIGNALS];
-    int delay_ms;
     Slider amplitude_slider;
     int tick_counter;
 } PlotConfig;

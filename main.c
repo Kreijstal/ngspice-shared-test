@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         t += config.time_increment;
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(config.delay_ms);
+        SDL_Delay(16); // Cap at roughly 60 FPS
     }
 
     cleanup(renderer, window, buffers);

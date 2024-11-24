@@ -34,6 +34,7 @@ void update_slider_value(Slider* slider, int x) {
 
 PlotConfig setup_config() {
     PlotConfig config = {
+        .num_signals = 2,
         .time_increment = 0.1,
         .window_width = 640,
         .window_height = 480,
@@ -43,7 +44,6 @@ PlotConfig setup_config() {
             {255, 255, 0, 255},  // Yellow for first signal
             {255, 0, 0, 255}     // Red for second signal
         },
-        .delay_ms = 100,
         .amplitude_slider = {
             .x = 50,
             .y = 20,
@@ -92,8 +92,8 @@ SDL_Renderer* create_renderer(SDL_Window* window) {
 }
 
 double** init_buffers(void) {
-    double** buffers = malloc(NUM_SIGNALS * sizeof(double*));
-    for (int j = 0; j < NUM_SIGNALS; j++) {
+    double** buffers = malloc(config->num_signals * sizeof(double*));
+    for (int j = 0; j < config->num_signals; j++) {
         buffers[j] = malloc(BUFFER_SIZE * sizeof(double));
         for (int i = 0; i < BUFFER_SIZE; i++) {
             buffers[j][i] = 0.0;
@@ -119,16 +119,19 @@ void draw_grid(SDL_Renderer* renderer, PlotConfig* config) {
 void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation) {
     if (useInterpolation) {
         for (int x = 0; x < BUFFER_SIZE - 1; x++) {
-            int y1[NUM_SIGNALS], y2[NUM_SIGNALS];
-            for (int s = 0; s < NUM_SIGNALS; s++) {
+            int* y1 = malloc(config->num_signals * sizeof(int));
+            int* y2 = malloc(config->num_signals * sizeof(int));
+            for (int s = 0; s < config->num_signals; s++) {
                 y1[s] = config->center_y + (int)(buffers[s][x] * config->amplitude);
                 y2[s] = config->center_y + (int)(buffers[s][x + 1] * config->amplitude);
             }
             drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
+            free(y1);
+            free(y2);
         }
     } else {
         for (int x = 0; x < BUFFER_SIZE; x++) {
-            for (int s = 0; s < NUM_SIGNALS; s++) {
+            for (int s = 0; s < config->num_signals; s++) {
                 int y = config->center_y + (int)(buffers[s][x] * config->amplitude);
                 pixelRGBA(renderer, x, y, 
                          config->colors[s].r, config->colors[s].g, 
@@ -160,7 +163,7 @@ void handle_events(SDL_Event* e, PlotConfig* config, int* quit, int* useInterpol
 }
 
 void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers) {
-    for (int i = 0; i < NUM_SIGNALS; i++) {
+    for (int i = 0; i < config->num_signals; i++) {
         free(buffers[i]);
     }
     free(buffers);
@@ -170,7 +173,7 @@ void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers) {
 }
 
 void update_buffers(double** buffers, SignalValues values, PlotConfig* config) {
-    for (int i = 0; i < NUM_SIGNALS; i++) {
+    for (int i = 0; i < config->num_signals; i++) {
         memmove(buffers[i], buffers[i] + 1, (BUFFER_SIZE - 1) * sizeof(double));
         buffers[i][BUFFER_SIZE - 1] = values.values[i];
     }
