@@ -95,9 +95,9 @@ PlotConfig setup_config() {
     return config;
 }
 
-SignalValues get_new_values(double t) {
+SignalValues get_new_values(double t, PlotConfig* config) {
     SignalValues values;
-    values.values[0] = sin(t);  // First signal: sine
+    values.values[0] = sin(t) * (config->amplitude_slider.value / 100.0);  // First signal: sine with slider amplitude
     values.values[1] = cos(t);  // Second signal: cosine
     return values;
 }
@@ -207,7 +207,7 @@ int main(int argc, char* argv[]) {
         
         // Generate and update signal values
         static double t = 0.0;
-        SignalValues new_values = get_new_values(t);
+        SignalValues new_values = get_new_values(t, &config);
         update_buffers(buffers, new_values, &config);
         t += config.time_increment;
 
