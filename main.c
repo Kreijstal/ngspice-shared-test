@@ -19,7 +19,7 @@ SignalValues get_new_values(double t, PlotConfig* config) {
 int main(int argc, char* argv[]) {
   //SDL2
     PlotConfig config = setup_config();
-    double** buffers = init_buffers(&config);
+    double** buffers = NULL;  // Will be initialized after first data
     
     SDL_Window* window = init_sdl(&config);
     if (!window) return 1;
@@ -62,8 +62,11 @@ int main(int argc, char* argv[]) {
         static bool first_callback = true;
         if (first_callback) {
             config.num_signals = data->num_signals < 15 ? data->num_signals : 15;
+            buffers = init_buffers(&config);  // Initialize buffers here
             first_callback = false;
         }
+        
+        if (!buffers) return;  // Safety check
         
         for (int i = 1; i < data->num_signals && i < 15; i++) {
             new_values.values[i] = data->signal_values[i];

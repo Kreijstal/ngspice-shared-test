@@ -126,6 +126,7 @@ void draw_grid(SDL_Renderer* renderer, PlotConfig* config) {
 }
 
 void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, int useInterpolation) {
+    if (!buffers) return;  // Safety check
     // Calculate decimation factor - how many samples to skip per pixel
     int decimation = (BUFFER_SIZE + config->window_width - 1) / config->window_width;
     if (decimation < 1) decimation = 1;
@@ -196,6 +197,7 @@ void cleanup(SDL_Renderer* renderer, SDL_Window* window, double** buffers, PlotC
 }
 
 void update_buffers(double** buffers, SignalValues values, PlotConfig* config) {
+    if (!buffers || config->num_signals == 0) return;  // Safety check
     for (int i = 0; i < config->num_signals; i++) {
         memmove(buffers[i], buffers[i] + 1, (BUFFER_SIZE - 1) * sizeof(double));
         buffers[i][BUFFER_SIZE - 1] = values.values[i];
