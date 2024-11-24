@@ -8,7 +8,7 @@ SDL2_GFX_LIBS := $(shell pkg-config --libs SDL2_gfx)
 SDL2_GFX_CFLAGS := $(shell pkg-config --cflags SDL2_gfx)
 
 # Libraries
-LIBS = -lngspice $(SDL2_GFX_LIBS) -lm `sdl2-config --cflags --libs`
+LIBS = -lngspice $(SDL2_GFX_LIBS) -lm
 CFLAGS += $(SDL2_GFX_CFLAGS)
 
 # Source files
