@@ -31,6 +31,8 @@ int main(int argc, char* argv[]) {
         pixelRGBA(renderer, x, y_cos, 255, 255, 0, 255);
     }
 
+    hlineRGBA(renderer, 0, 639, 240, 255, 255, 255, 255); // X-axis in white
+    vlineRGBA(renderer, 320, 0, 479, 255, 255, 255, 255); // Y-axis in white
     SDL_RenderPresent(renderer);
 
     SDL_Delay(5000); // Warte 5 Sekunden
