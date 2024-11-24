@@ -26,7 +26,8 @@ void signal_handler(int signum) {
 }
 
 int ng_getchar(char* outputchar, int ident, void* userdata) {
-    SimContext* context = (SimContext*)userdata;
+    (void)userdata;  // Suppress unused parameter warning
+    (void)ident;     // Suppress unused parameter warning
     printf("%s\n", outputchar);
     return 0;
 }
