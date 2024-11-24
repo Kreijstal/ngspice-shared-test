@@ -8,6 +8,11 @@
 // Global context pointer for signal handler
 SimContext* g_context = NULL;
 
+void set_simulation_callback(SimContext* context, SimDataCallback callback, void* user_data) {
+    context->data_callback = callback;
+    context->callback_data = user_data;
+}
+
 void signal_handler(int signum) {
     if (g_context && g_context->csv_file) {
         fflush(g_context->csv_file);
@@ -72,6 +77,12 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         return 0;
     }
 
+    // Prepare simulation data for callback
+    SimulationData sim_data = {0};
+    sim_data.count = vecdata->veccount - 1;  // Subtract 1 to exclude time
+    sim_data.values = malloc(sim_data.count * sizeof(double));
+    sim_data.names = malloc(sim_data.count * sizeof(char*));
+
     // Find the time vector
     pvecvalues timeValue = NULL;
     for (int i = 0; i < vecdata->veccount; i++) {
@@ -115,6 +126,33 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
     }
     fprintf(context->csv_file, "\n");
     fflush(context->csv_file);
+
+    // Fill simulation data
+    int value_index = 0;
+    for (int i = 0; i < vecdata->veccount; i++) {
+        pvecvalues value = vecdata->vecsa[i];
+        if (!value || !value->name) continue;
+
+        if (strcmp(value->name, "time") == 0) {
+            sim_data.time = value->creal;
+        } else {
+            sim_data.values[value_index] = value->creal;
+            sim_data.names[value_index] = strdup(value->name);
+            value_index++;
+        }
+    }
+
+    // Call the callback if set
+    if (context->data_callback) {
+        context->data_callback(&sim_data, context->callback_data);
+    }
+
+    // Clean up
+    for (int i = 0; i < sim_data.count; i++) {
+        free(sim_data.names[i]);
+    }
+    free(sim_data.values);
+    free(sim_data.names);
     
     return 0;
 }

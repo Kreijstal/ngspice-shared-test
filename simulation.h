@@ -6,6 +6,17 @@
 #include <stdio.h>
 
 // Structure to hold simulation context
+// Structure to hold simulation vector data
+typedef struct {
+    double time;
+    double* values;
+    char** names;
+    int count;
+} SimulationData;
+
+// Callback function type
+typedef void (*SimDataCallback)(SimulationData* data, void* user_data);
+
 typedef struct {
     bool simulation_finished;
     int current_progress;
@@ -14,7 +25,12 @@ typedef struct {
     bool should_alter_voltage;
     bool is_bg_running;
     bool headers_written;
+    SimDataCallback data_callback;  // Callback function pointer
+    void* callback_data;           // User data for callback
 } SimContext;
+
+// Function to set the callback
+void set_simulation_callback(SimContext* context, SimDataCallback callback, void* user_data);
 
 // Global context pointer declaration
 extern SimContext* g_context;

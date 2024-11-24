@@ -29,9 +29,20 @@ int main() {
         return 1;
     }
 
+    // Example callback function
+    void handle_simulation_data(SimulationData* data, void* user_data) {
+        printf("Received simulation data at time: %f\n", data->time);
+        for (int i = 0; i < data->count; i++) {
+            printf("  %s: %f\n", data->names[i], data->values[i]);
+        }
+    }
+
     // Initialize ngspice
     int ret = ngSpice_Init(ng_getchar, ng_getstat, ng_exit,
                           ng_data, ng_initdata, ng_bgrunning, &context);
+
+    // Set up the callback
+    set_simulation_callback(&context, handle_simulation_data, NULL);
 
     if (ret != 0) {
         fprintf(stderr, "Error initializing ngspice\n");
