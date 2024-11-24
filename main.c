@@ -68,8 +68,19 @@ int main(int argc, char* argv[]) {
         
         if (!buffers) return;  // Safety check
         
-        for (int i = 1; i < data->num_signals && i < 15; i++) {
-            new_values.values[i] = data->signal_values[i];
+        int plot_idx = 0;
+        for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
+            // Skip signals with "#branch" in their name
+            if (data->signal_names && data->signal_names[i] && 
+                strstr(data->signal_names[i], "#branch") != NULL) {
+                continue;
+            }
+            new_values.values[plot_idx] = data->signal_values[i];
+            plot_idx++;
+        }
+        // Update number of actual signals being plotted
+        if (first_callback) {
+            config.num_signals = plot_idx;
         }
         update_buffers(buffers, new_values, &config);
     }
