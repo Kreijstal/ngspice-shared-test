@@ -1,8 +1,11 @@
 #include "plot.h"
 
-void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int y_cos1, int y_cos2) {
-    lineRGBA(renderer, x1, y1, x2, y2, 255, 255, 0, 255); // Yellow for sine
-    lineRGBA(renderer, x1, y_cos1, x2, y_cos2, 255, 0, 0, 255); // Red for cosine
+void drawLine(SDL_Renderer *renderer, int x1, int* y1, int x2, int* y2, PlotConfig* config) {
+    for (int s = 0; s < config->num_signals; s++) {
+        lineRGBA(renderer, x1, y1[s], x2, y2[s],
+                 config->colors[s].r, config->colors[s].g,
+                 config->colors[s].b, config->colors[s].a);
+    }
 }
 
 void draw_slider(SDL_Renderer* renderer, Slider* slider) {
@@ -142,7 +145,7 @@ void draw_signals(SDL_Renderer* renderer, double** buffers, PlotConfig* config, 
                 y2[s] = config->center_y + (int)(buffers[s][next_buffer_idx] * config->amplitude);
             }
             
-            drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
+            drawLine(renderer, x, y1, x + 1, y2, config);
             free(y1);
             free(y2);
         }

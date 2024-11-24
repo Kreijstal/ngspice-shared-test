@@ -38,7 +38,7 @@ typedef struct {
     double values[15];  // Fixed size matching colors array
 } SignalValues;
 
-void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int y_cos1, int y_cos2);
+void drawLine(SDL_Renderer *renderer, int x1, int* y1, int x2, int* y2, PlotConfig* config);
 void draw_slider(SDL_Renderer* renderer, Slider* slider);
 bool is_point_in_slider(Slider* slider, int x, int y);
 void update_slider_value(Slider* slider, int x);
