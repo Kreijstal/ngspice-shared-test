@@ -2,7 +2,6 @@
 .env
 plot
 simulation
-simulation.o
-simulation_impl.o
-simulation_data.csv
-simulation_plot.png
+*.o
+*.csv
+*.png
