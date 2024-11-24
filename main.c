@@ -59,16 +59,16 @@ int main(int argc, char* argv[]) {
         SignalValues new_values;
         static bool first_callback = true;
         
-        // Count actual signals (excluding #branch)
+        // Count and process actual signals (excluding #branch)
         int plot_idx = 0;
-        for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
-            if (data->signal_names && data->signal_names[i] && 
-                strstr(data->signal_names[i], "#branch") == NULL) {
-                plot_idx++;
-            }
-        }
-        
         if (first_callback) {
+            // First pass: count signals for initialization
+            for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
+                if (data->signal_names && data->signal_names[i] && 
+                    strstr(data->signal_names[i], "#branch") == NULL) {
+                    plot_idx++;
+                }
+            }
             config.num_signals = plot_idx;
             buffers = init_buffers(&config);
             first_callback = false;
@@ -76,15 +76,14 @@ int main(int argc, char* argv[]) {
         
         if (!buffers) return;  // Safety check
         
-        int plot_idx = 0;
+        // Second pass: fill in the values
+        plot_idx = 0;  // Reset counter for actual data processing
         for (int i = 1; i < data->num_signals && plot_idx < 15; i++) {
-            // Skip signals with "#branch" in their name
             if (data->signal_names && data->signal_names[i] && 
-                strstr(data->signal_names[i], "#branch") != NULL) {
-                continue;
+                strstr(data->signal_names[i], "#branch") == NULL) {
+                new_values.values[plot_idx] = data->signal_values[i];
+                plot_idx++;
             }
-            new_values.values[plot_idx] = data->signal_values[i];
-            plot_idx++;
         }
         // Update number of actual signals being plotted
         if (first_callback) {
