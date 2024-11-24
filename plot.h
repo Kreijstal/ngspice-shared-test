@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 12800
+#define BUFFER_SIZE 128000
 
 typedef struct {
     int x;
