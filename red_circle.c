@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2_gfxPrimitives.h>
 #include <stdio.h>
+#include <math.h>
 
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -23,11 +24,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    filledCircleRGBA(renderer, 320, 240, 100, 255, 0, 0, 255); // Roter Kreis
+    for (int x = 0; x < 640; x++) {
+        int y_sin = 240 + (int)(sin(x * 0.01) * 100); // Sine wave in red
+        int y_cos = 240 + (int)(cos(x * 0.01) * 100); // Cosine wave in yellow
+        pixelRGBA(renderer, x, y_sin, 255, 0, 0, 255);
+        pixelRGBA(renderer, x, y_cos, 255, 255, 0, 255);
+    }
 
     SDL_RenderPresent(renderer);
 
-    SDL_Delay(3000); // Warte 3 Sekunden
+    SDL_Delay(5000); // Warte 5 Sekunden
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
