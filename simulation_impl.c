@@ -111,13 +111,15 @@ int ng_data(pvecvaluesall vecdata, int numvecs, int ident, void* userdata) {
         pvecvalues value = vecdata->vecsa[i];
         if (!value || !value->name) continue;
         
-        printf("%s = ", value->name);
         if (value->is_complex) {
-            printf("%g + j%g", value->creal, value->cimag);
+            DEBUG_PRINT(DEBUG_VERBOSE, "%s = %g + j%g%s", value->name, 
+                       value->creal, value->cimag, 
+                       value->is_scale ? " (scale)" : "");
         } else {
-            printf("%g", value->creal);
+            DEBUG_PRINT(DEBUG_VERBOSE, "%s = %g%s", value->name, 
+                       value->creal,
+                       value->is_scale ? " (scale)" : "");
         }
-        printf("%s\n", value->is_scale ? " (scale)" : "");
         
         if (strcmp(value->name, "time") != 0) {
             if (value->is_complex) {
@@ -174,15 +176,15 @@ int ng_initdata(pvecinfoall initdata, int ident, void* userdata) {
     DEBUG_PRINT(DEBUG_INFO, "Date: %s", initdata->date ? initdata->date : "unknown");
     DEBUG_PRINT(DEBUG_INFO, "Type: %s", initdata->type ? initdata->type : "unknown");
     
-    printf("\nAvailable vectors:\n\n");
+    DEBUG_PRINT(DEBUG_VERBOSE, "Available vectors:");
     for (int i = 0; i < initdata->veccount; i++) {
         pvecinfo vec = initdata->vecs[i];
         if (!vec || !vec->vecname) continue;
         
-        printf("  %d: %s (%s)\n", 
-               i, 
-               vec->vecname,
-               vec->is_real ? "real" : "complex\n");
+        DEBUG_PRINT(DEBUG_VERBOSE, "  %d: %s (%s)", 
+                   i, 
+                   vec->vecname,
+                   vec->is_real ? "real" : "complex");
     }
     printf("\n");
     
