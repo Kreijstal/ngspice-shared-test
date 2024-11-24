@@ -205,6 +205,12 @@ int main(int argc, char* argv[]) {
         // Draw the amplitude slider
         draw_slider(renderer, &config.amplitude_slider);
         
+        // Generate and update signal values
+        static double t = 0.0;
+        SignalValues new_values = get_new_values(t);
+        update_buffers(buffers, new_values, &config);
+        t += config.time_increment;
+
         SDL_RenderPresent(renderer);
         SDL_Delay(config.delay_ms);
     }
