@@ -152,6 +152,17 @@ int main(int argc, char* argv[]) {
                 if (e.key.keysym.sym == SDLK_i) {
                     useInterpolation = !useInterpolation;
                 }
+            } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                if (is_point_in_slider(&config.amplitude_slider, e.button.x, e.button.y)) {
+                    config.amplitude_slider.dragging = true;
+                    update_slider_value(&config.amplitude_slider, e.button.x);
+                }
+            } else if (e.type == SDL_MOUSEBUTTONUP) {
+                config.amplitude_slider.dragging = false;
+            } else if (e.type == SDL_MOUSEMOTION) {
+                if (config.amplitude_slider.dragging) {
+                    update_slider_value(&config.amplitude_slider, e.motion.x);
+                }
             }
         }
 
