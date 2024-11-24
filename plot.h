@@ -12,7 +12,6 @@
 #define BUFFER_SIZE 640
 
 typedef struct {
-    int num_signals;
     int x;
     int y;
     int width;
@@ -29,13 +28,14 @@ typedef struct {
     int window_height;
     int center_y;
     int amplitude;
-    SDL_Color colors[NUM_SIGNALS];
+    int num_signals;
+    SDL_Color colors[2];  // Fixed size for now - could be made dynamic later
     Slider amplitude_slider;
     int tick_counter;
 } PlotConfig;
 
 typedef struct {
-    double values[NUM_SIGNALS];
+    double values[2];  // Fixed size matching colors array
 } SignalValues;
 
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int y_cos1, int y_cos2);
@@ -49,7 +49,7 @@ void update_buffers(double** buffers, SignalValues values, PlotConfig* config);
 // SDL initialization functions
 SDL_Window* init_sdl(PlotConfig* config);
 SDL_Renderer* create_renderer(SDL_Window* window);
-double** init_buffers(void);
+double** init_buffers(PlotConfig* config);
 
 // Drawing functions
 void draw_grid(SDL_Renderer* renderer, PlotConfig* config);

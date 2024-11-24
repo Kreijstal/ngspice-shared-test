@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[]) {
     PlotConfig config = setup_config();
-    double** buffers = init_buffers();
+    double** buffers = init_buffers(&config);
     
     SDL_Window* window = init_sdl(&config);
     if (!window) return 1;

@@ -91,7 +91,7 @@ SDL_Renderer* create_renderer(SDL_Window* window) {
     return renderer;
 }
 
-double** init_buffers(void) {
+double** init_buffers(PlotConfig* config) {
     double** buffers = malloc(config->num_signals * sizeof(double*));
     for (int j = 0; j < config->num_signals; j++) {
         buffers[j] = malloc(BUFFER_SIZE * sizeof(double));
