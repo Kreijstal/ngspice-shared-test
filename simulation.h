@@ -61,6 +61,7 @@ void set_simulation_callback(SimContext* context, SimDataCallback callback, void
 extern SimContext* g_context;
 
 // Function declarations
+void cleanup_simulation(SimContext* context);
 void signal_handler(int signum);
 int ng_getchar(char* outputchar, int ident, void* userdata);
 int ng_getstat(char* outputstat, int ident, void* userdata);

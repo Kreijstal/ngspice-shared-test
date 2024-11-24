@@ -177,11 +177,7 @@ int main(int argc, char* argv[]) {
         SDL_Delay(16); // Cap at roughly 60 FPS
     }
 
+    cleanup_simulation(&context);
     cleanup(renderer, window, buffers, &config);
-    // Close CSV file
-    if (context.csv_file) {
-        fclose(context.csv_file);
-        context.csv_file = NULL;
-    }
     return 0;
 }

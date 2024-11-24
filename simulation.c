@@ -16,13 +16,30 @@ void set_simulation_callback(SimContext* context, SimDataCallback callback, void
     context->callback_data = user_data;
 }
 
-void signal_handler(int signum) {
-    if (g_context && g_context->csv_file) {
-        fflush(g_context->csv_file);
-        fclose(g_context->csv_file);
-        g_context->csv_file = NULL;
+void cleanup_simulation(SimContext* context) {
+    if (!context) return;
+
+    // Halt any running simulation
+    if (context->is_bg_running) {
+        ngSpice_Command("bg_halt");
+        // Small delay to allow halt to complete
+        usleep(10000);
     }
-    exit(signum);
+
+    // Close CSV file if open
+    if (context->csv_file) {
+        fflush(context->csv_file);
+        fclose(context->csv_file);
+        context->csv_file = NULL;
+    }
+}
+
+void signal_handler(int signum) {
+    if (g_context) {
+        cleanup_simulation(g_context);
+    }
+    signal(signum, SIG_DFL);  // Reset to default handler
+    raise(signum);  // Re-raise the signal
 }
 
 int ng_getchar(char* outputchar, int ident, void* userdata) {
