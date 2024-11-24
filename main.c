@@ -138,10 +138,8 @@ int main(int argc, char* argv[]) {
 
     while (!quit) {
 
-        printf("current_progress %d%%  should_alter_voltage: %d %d\n",context.current_progress,context.should_alter_voltage,context.is_bg_running );
-        
-        // Check if we need to alter voltage
-        if (context.should_alter_voltage && !context.voltage_altered && context.is_bg_running) {
+        // Check if slider value changed
+        if (config.amplitude_slider.value_changed && context.is_bg_running) {
             printf("Halting simulation to alter voltage...\n");
             ngSpice_Command("bg_halt");
             
@@ -150,12 +148,15 @@ int main(int argc, char* argv[]) {
                 usleep(10000);
             }
             
-            printf("Simulation halted, altering voltage...\n");
-            ngSpice_Command("alter Vvdc=0");
-            context.voltage_altered = true;
+            char alter_cmd[64];
+            snprintf(alter_cmd, sizeof(alter_cmd), "alter Vvdc=%f", config.amplitude_slider.value);
+            printf("Simulation halted, altering voltage to %f...\n", config.amplitude_slider.value);
+            ngSpice_Command(alter_cmd);
             
             printf("Resuming simulation...\n");
             ngSpice_Command("bg_resume");
+            
+            config.amplitude_slider.value_changed = false;
         }
 
         while (SDL_PollEvent(&e) != 0) {
