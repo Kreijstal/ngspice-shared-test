@@ -1,5 +1,12 @@
 #include "plot.h"
 
+SignalValues get_new_values(double t, PlotConfig* config) {
+    SignalValues values;
+    values.values[0] = sin(t) * (config->amplitude_slider.value / 100.0);  // First signal: sine with slider amplitude
+    values.values[1] = cos(t);  // Second signal: cosine
+    return values;
+}
+
 int main(int argc, char* argv[]) {
     PlotConfig config = setup_config();
     double** buffers = init_buffers(&config);

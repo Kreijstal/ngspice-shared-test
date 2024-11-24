@@ -43,7 +43,6 @@ void draw_slider(SDL_Renderer* renderer, Slider* slider);
 bool is_point_in_slider(Slider* slider, int x, int y);
 void update_slider_value(Slider* slider, int x);
 PlotConfig setup_config(void);
-SignalValues get_new_values(double t, PlotConfig* config);
 void update_buffers(double** buffers, SignalValues values, PlotConfig* config);
 
 // SDL initialization functions
