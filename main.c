@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
     // Callback function to update plot buffers with simulation data
     void handle_simulation_data(SimulationData* data, void* user_data) {
         SignalValues new_values;
-        for (int i = 0; i < data->num_signals && i < 15; i++) {
+        for (int i = 1; i < data->num_signals && i < 15; i++) {
             new_values.values[i] = data->signal_values[i];
         }
         update_buffers(buffers, new_values, &config);
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
         "Rres1 k y 1.0Ohm",
         ".options TEMP = 25C",
         ".options TNOM = 25C",
-        ".tran 0.001s 12s 0s uic",
+        ".tran 0.0001s 12s 0s uic",
         ".end",
         NULL
     };
