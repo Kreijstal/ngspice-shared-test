@@ -55,11 +55,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Example callback function
+    // Callback function to update plot buffers with simulation data
     void handle_simulation_data(SimulationData* data, void* user_data) {
-        printf("Simulation time: %f\n", data->time);
-        for (int i = 0; i < data->num_signals; i++) {
-            printf("  Signal '%s': %f\n", data->signal_names[i], data->signal_values[i]);
+        SignalValues new_values;
+        for (int i = 0; i < data->num_signals && i < 15; i++) {
+            new_values.values[i] = data->signal_values[i];
         }
         update_buffers(buffers, new_values, &config);
     }
