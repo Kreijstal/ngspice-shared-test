@@ -8,8 +8,8 @@
 #define BUFFER_SIZE 640
 
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2) {
-    lineRGBA(renderer, x1, y1, x2, y2, 255, 0, 0, 255); // Red for sine
-    lineRGBA(renderer, x1, y1 + (y2 - y1), x2, y2 + (y2 - y1), 255, 255, 0, 255); // Yellow for cosine
+    lineRGBA(renderer, x1, y1, x2, y2, 255, 255, 0, 255); // Yellow for sine
+    lineRGBA(renderer, x1, y1 + (y2 - y1), x2, y2 + (y2 - y1), 255, 0, 0, 255); // Red for cosine
 }
 
 void update_values(double* sin_buffer, double* cos_buffer, double new_val) {
