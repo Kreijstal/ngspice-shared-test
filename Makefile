@@ -15,5 +15,5 @@ SDL_LIBS = `sdl2-config --cflags --libs`
 simulation: simulation.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS)
 
-plot: plot.c
-	$(CC) $(CFLAGS) $< -o $@ $(SDL_LIBS) $(LDLIBS)
+plot: plot.c main.c
+	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS) $(LDLIBS)
