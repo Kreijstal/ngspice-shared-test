@@ -175,9 +175,8 @@ int main(int argc, char* argv[]) {
             for (int x = 0; x < BUFFER_SIZE - 1; x++) {
                 int y1[NUM_SIGNALS], y2[NUM_SIGNALS];
                 for (int s = 0; s < NUM_SIGNALS; s++) {
-                    int amp = (s == 0) ? config.amplitude_slider.value : config.amplitude;
-                    y1[s] = config.center_y + (int)(buffers[s][x] * amp);
-                    y2[s] = config.center_y + (int)(buffers[s][x + 1] * amp);
+                    y1[s] = config.center_y + (int)(buffers[s][x] * config.amplitude);
+                    y2[s] = config.center_y + (int)(buffers[s][x + 1] * config.amplitude);
                 }
                 drawLine(renderer, x, y1[0], x + 1, y2[0], y1[1], y2[1]);
             }
