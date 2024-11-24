@@ -1,31 +1,29 @@
-# Compiler
+# Compiler settings
 CC ?= gcc
-
-# Compiler Flags
 CFLAGS ?= -Wall -I.
-
-# Linker Flags
 LDFLAGS ?=
 
-# Libraries
-LDLIBS = -lngspice -lSDL2_gfx -lm
-SDL_LIBS = `sdl2-config --cflags --libs`
+# Project-specific settings
+PLOT_LIBS = -lSDL2_gfx -lm `sdl2-config --cflags --libs`
+SIM_LIBS = -lngspice -lm
 
-# Source files for simulation
-SIM_SRCS = simulation.c simulation_impl.c
+# Source files
+PLOT_SRCS = plot.c main_plot.c
+SIM_SRCS = simulation.c simulation_impl.c main_sim.c
+PLOT_OBJS = $(PLOT_SRCS:.c=.o)
 SIM_OBJS = $(SIM_SRCS:.c=.o)
 
 # Targets
-all: simulation plot
+all: plot_app simulation_app
 
-simulation: $(SIM_OBJS)
-	$(CC) $(CFLAGS) $(SIM_OBJS) -o $@ $(LDFLAGS) $(LDLIBS)
+plot_app: $(PLOT_OBJS)
+	$(CC) $(CFLAGS) $(PLOT_OBJS) -o $@ $(LDFLAGS) $(PLOT_LIBS)
 
-%.o: %.c simulation.h
+simulation_app: $(SIM_OBJS)
+	$(CC) $(CFLAGS) $(SIM_OBJS) -o $@ $(LDFLAGS) $(SIM_LIBS)
+
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-plot: plot.c main.c
-	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS) $(LDLIBS)
-
 clean:
-	rm -f simulation plot *.o
+	rm -f plot_app simulation_app *.o
